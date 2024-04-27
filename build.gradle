@@ -26,6 +26,7 @@ javafx {
 
 dependencies {
     implementation 'fr.brouillard.oss:cssfx:11.4.0'
+    implementation 'io.github.mkpaz:atlantafx-base:2.0.0'
 }
 
 jlink {
@@ -46,6 +47,15 @@ jlink {
         } else {
             installerType = "deb"
             installerOptions.addAll '--linux-shortcut'
+        }
+    }
+}
+
+configurations.forEach { config ->
+    if (config.name.contains("downloadSources")) {
+        def runtimeAttributes = configurations.runtimeClasspath.attributes
+        runtimeAttributes.keySet().each { key ->
+            config.attributes.attribute(key, runtimeAttributes.getAttribute(key))
         }
     }
 }
