@@ -1,8 +1,8 @@
-module org.example.bibliotec {
+module org.bibliotec.app {
     requires javafx.controls;
     requires javafx.fxml;
 
 
-    opens org.example.bibliotec to javafx.fxml;
-    exports org.example.bibliotec;
+    opens org.bibliotec.app to javafx.fxml;
+    exports org.bibliotec.app;
 }

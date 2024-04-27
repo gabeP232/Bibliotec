@@ -1,40 +1,51 @@
-plugins {
-    id 'java'
-    id 'application'
-    id 'org.javamodularity.moduleplugin' version '1.8.12'
-    id 'org.openjfx.javafxplugin' version '0.0.13'
-    id 'org.beryx.jlink' version '2.25.0'
-}
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'org.beryx.jlink' version '3.0.1'
+}
 
 repositories {
     mavenCentral()
 }
 
+version '1.0'
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+defaultTasks 'run'
+
 application {
-    mainModule = 'org.example.bibliotec'
-    mainClass = 'org.example.bibliotec.HelloApplication'
+    mainModule = 'org.bibliotec.app'
+    mainClass = 'org.bibliotec.app.Main'
 }
 
 javafx {
-    version = '21'
+    version = '21.0.1'
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
 dependencies {
+    implementation 'fr.brouillard.oss:cssfx:11.4.0'
 }
-
 
 jlink {
-    imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
-    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    addOptions '--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages', '--strip-native-commands',
+            '--dedup-legal-notices=error-if-not-same-content'
     launcher {
-        name = 'app'
+        name = 'Bibliotec'
+        noConsole = true
     }
-}
-
-jlinkZip {
-    group = 'distribution'
+    jpackage {
+        vendor = 'Bibliotec'
+        installerOutputDir = file("${buildDir}/distributions/")
+        if (DefaultNativePlatform.currentOperatingSystem.isMacOsX()) {
+            installerType = "dmg"
+        } else if (DefaultNativePlatform.currentOperatingSystem.isWindows()) {
+            installerOptions.addAll '--win-dir-chooser', '--win-menu', '--win-shortcut'
+            installerType = "msi"
+        } else {
+            installerType = "deb"
+            installerOptions.addAll '--linux-shortcut'
+        }
+    }
 }

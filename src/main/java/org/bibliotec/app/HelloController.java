@@ -1,4 +1,4 @@
-package org.example.bibliotec;
+package org.bibliotec.app;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
