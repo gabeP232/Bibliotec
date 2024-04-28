@@ -3,6 +3,7 @@ open module org.bibliotec.app {
     requires javafx.fxml;
 
     requires atlantafx.base;
-    //requires mysql.connector.j;
+    requires org.controlsfx.controls;
+//    requires mysql.connector.j;
     requires java.sql;
 }
