@@ -1,11 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
+<?import atlantafx.base.layout.InputGroup?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<VBox
-        xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="org.bibliotec.app.HomeController">
-    <Button text="Logout" onAction="#logout"/>
-    <Button text="Books" onAction="#books"/>
-    <Button text="Users" onAction="#users"/>
-    <Button text="Loans" onAction="#loans"/>
+<?import org.controlsfx.control.MasterDetailPane?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="org.bibliotec.app.HomeController"
+      spacing="20" minHeight="400" minWidth="350">
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20"/>
+    </padding>
+
+    <fx:define>
+        <ToggleGroup fx:id="tabs"/>
+        <MasterDetailPane>
+            <masterNode>
+                <AnchorPane fx:id="booksView">
+                    <TableView fx:id="booksTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+                    <ToolBar AnchorPane.bottomAnchor="0">
+                        <Button text="Add" onAction="#add" userData="$booksTable"/>
+                        <Button text="Delete" onAction="#delete" userData="$booksTable"/>
+                    </ToolBar>
+                </AnchorPane>
+            </masterNode>
+            <detailNode>
+<!--                <TableView fx:id="bookLoansTable" editable="true"/>-->
+            </detailNode>
+        </MasterDetailPane>
+        <MasterDetailPane fx:id="patronsView" detailSide="RIGHT" VBox.vgrow="ALWAYS">
+            <masterNode>
+                <AnchorPane>
+                    <TableView fx:id="patronsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+                    <ToolBar AnchorPane.bottomAnchor="0">
+                        <Button text="Add" onAction="#add" userData="patronsTable"/>
+                        <Button text="Delete" onAction="#delete" userData="patronsTable"/>
+                    </ToolBar>
+                </AnchorPane>
+            </masterNode>
+            <detailNode>
+                <TableView fx:id="patronLoansTable" editable="true"/>
+            </detailNode>
+        </MasterDetailPane>
+        <AnchorPane fx:id="loansView">
+            <TableView fx:id="loansTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+            <ToolBar AnchorPane.bottomAnchor="0">
+                <Button text="Add" onAction="#add" userData="$loansTable"/>
+                <Button text="Delete" onAction="#delete" userData="$loansTable"/>
+            </ToolBar>
+        </AnchorPane>
+    </fx:define>
+
+    <HBox alignment="CENTER" spacing="10">
+        <InputGroup>
+            <ToggleButton text="Books" toggleGroup="$tabs" userData="$booksView" selected="true"/>
+            <ToggleButton text="Patrons" toggleGroup="$tabs" userData="$patronsView"/>
+            <ToggleButton text="Loans" toggleGroup="$tabs" userData="$loansView"/>
+        </InputGroup>
+        <Button text="Logout" onAction="#logout"/>
+    </HBox>
+    <fx:reference source="booksView"/>
 </VBox>
