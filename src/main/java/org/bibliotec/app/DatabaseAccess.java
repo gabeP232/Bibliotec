@@ -2,7 +2,11 @@ package org.bibliotec.app;
 
 import org.apache.ibatis.jdbc.ScriptRunner;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -18,18 +22,19 @@ public class DatabaseAccess {
 
     private static Connection connection;
 
-    private static Connection connection() {
+    public static Connection connection() {
         // initialize database, creating tables if doesn't exist, open connection, etc...
         if (connection == null) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", "An15no35gabe!");
+                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "An15no35gabe!");
                 System.out.println(connection);
 
+
                 ScriptRunner scriptRunner = new ScriptRunner(connection);
-                scriptRunner.setSendFullScript(true);
-                scriptRunner.setStopOnError(true);
+
                 scriptRunner.runScript(new InputStreamReader(DatabaseAccess.class.getResourceAsStream("bibliotec.sql")));
+                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", "An15no35gabe!");
             } catch (ClassNotFoundException | SQLException e) {
                 throw new RuntimeException(e);
             }

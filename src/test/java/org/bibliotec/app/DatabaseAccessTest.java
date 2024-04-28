@@ -21,5 +21,10 @@ class DatabaseAccessTest {
     void doStuff() {
         System.out.println("Hello world!");
     }
+
+    @Test
+    void connect() {
+        DatabaseAccess.connection();
+    }
 }
 
