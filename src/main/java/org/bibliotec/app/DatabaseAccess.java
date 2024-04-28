@@ -1,5 +1,8 @@
 package org.bibliotec.app;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.List;
 
 public class DatabaseAccess {
@@ -10,16 +13,31 @@ public class DatabaseAccess {
     record Loan(User user, Book book, String date) {}
     record Admin(String username, String password) {}
 
-    public static void initialize() {
+    private static Connection connection;
+
+    private static Connection connection() {
         // initialize database, creating tables if doesn't exist, open connection, etc...
+        if (connection == null) {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", "An15no35gabe!");
+                System.out.println(connection);
+            } catch (ClassNotFoundException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return connection;
     }
 
-    public static List<Admin> getLogin() {
+    public static boolean login(String username, String password) {
         // return true if success, false otherwise
-        return List.of(
-                new Admin("admin", "password"),
-                new Admin("admin", "admin")
-        );
+        try (var stmt = connection().prepareStatement("SELECT * FROM LOGIN where username = ? and password = ? ")) {
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+            return stmt.executeQuery().next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static List<Book> getBooks() {

@@ -26,7 +26,7 @@
                 </AnchorPane>
             </masterNode>
             <detailNode>
-<!--                <TableView fx:id="bookLoansTable" editable="true"/>-->
+                <TableView fx:id="bookLoansTable" editable="true"/>
             </detailNode>
         </MasterDetailPane>
         <MasterDetailPane fx:id="patronsView" detailSide="RIGHT" VBox.vgrow="ALWAYS">
@@ -34,8 +34,8 @@
                 <AnchorPane>
                     <TableView fx:id="patronsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
                     <ToolBar AnchorPane.bottomAnchor="0">
-                        <Button text="Add" onAction="#add" userData="patronsTable"/>
-                        <Button text="Delete" onAction="#delete" userData="patronsTable"/>
+                        <Button text="Add" onAction="#add" userData="$patronsTable"/>
+                        <Button text="Delete" onAction="#delete" userData="$patronsTable"/>
                     </ToolBar>
                 </AnchorPane>
             </masterNode>

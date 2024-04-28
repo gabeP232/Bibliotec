@@ -9,7 +9,6 @@ class DatabaseAccessTest {
 
     @Test
     void login() {
-        assertThat(DatabaseAccess.getLogin().
     }
 
     @Test

@@ -67,27 +67,11 @@ public class LoginController {
                 ));
     }
 
-    public void login() throws SQLException, ClassNotFoundException {
-
-
-
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", "An15no35gabe!");
-        System.out.println(con);
-
-        String username2 = username.getText();
-        String password2 = password.getText();
-
-        Statement stm = con.createStatement();
-        String sql = "SELECT * FROM LOGIN where username ='" + username2 + "' and password='" + password2 + "'";
-        ResultSet rs = stm.executeQuery(sql);
-
-        if (rs.next()) {
+    public void login() {
+        if (DatabaseAccess.login(username.getText(), password.getText())) {
             errorMessage.setVisible(false);
             HomeController.show();
-            return;
-        }
-        else {
+        } else {
             errorMessage.setVisible(true);
         }
     }
