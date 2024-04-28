@@ -73,6 +73,7 @@ public class HomeController {
                 // save the data
             });
             column.setCellFactory(TextFieldTableCell.forTableColumn());
+//            TextFieldTableCell.forTableColumn(StringConverter.)
             table.getColumns().add(column);
         }
     }
@@ -88,7 +89,7 @@ public class HomeController {
 
     @SuppressWarnings("rawtypes")
     public void delete(ActionEvent actionEvent) {
-        var table = ((TableView) ((Node) actionEvent.getTarget()).getUserData());
+        var table = (TableView) ((Node) actionEvent.getTarget()).getUserData();
         table.getItems().remove(table.getSelectionModel().getSelectedItem());
     }
 }

@@ -2,7 +2,7 @@ package org.bibliotec.app;
 
 import org.apache.ibatis.jdbc.ScriptRunner;
 
-import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -29,8 +29,8 @@ public class DatabaseAccess {
                 ScriptRunner scriptRunner = new ScriptRunner(connection);
                 scriptRunner.setSendFullScript(true);
                 scriptRunner.setStopOnError(true);
-                scriptRunner.runScript(new java.io.FileReader(String.valueOf(DatabaseAccess.class.getResource("bibliotec.sql"))));
-            } catch (ClassNotFoundException | SQLException | FileNotFoundException e) {
+                scriptRunner.runScript(new InputStreamReader(DatabaseAccess.class.getResourceAsStream("bibliotec.sql")));
+            } catch (ClassNotFoundException | SQLException e) {
                 throw new RuntimeException(e);
             }
         }
