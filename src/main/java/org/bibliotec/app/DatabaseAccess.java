@@ -17,7 +17,7 @@ public class DatabaseAccess {
     public static List<Admin> getLogin() {
         // return true if success, false otherwise
         return List.of(
-                new Admin("admin", "123"),
+                new Admin("admin", "password"),
                 new Admin("admin", "admin")
         );
     }
