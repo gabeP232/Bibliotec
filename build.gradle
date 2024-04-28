@@ -25,8 +25,16 @@ javafx {
 }
 
 dependencies {
-    implementation 'fr.brouillard.oss:cssfx:11.4.0'
-    implementation 'io.github.mkpaz:atlantafx-base:2.0.0'
+    implementation 'fr.brouillard.oss:cssfx:11.5.1'
+    implementation 'io.github.mkpaz:atlantafx-base:2.0.1'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation 'org.assertj:assertj-core:3.25.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 jlink {
