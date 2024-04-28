@@ -10,6 +10,9 @@ import static javafx.beans.binding.Bindings.when;
 
 public class LoginController {
 
+    public static final String USERNAME = "admin";
+    public static final String PASSWORD = "admin";
+
     public TextField username;
     public PasswordField password;
     public Message message;
@@ -26,12 +29,20 @@ public class LoginController {
     }
 
     public void login() {
-        System.out.println("Login button clicked!");
-        username.pseudoClassStateChanged(Styles.STATE_DANGER, username.getText().isEmpty());
-        password.pseudoClassStateChanged(Styles.STATE_DANGER, password.getText().isEmpty());
-        message.setVisible(username.getText().isEmpty() || password.getText().isEmpty());
+        if (username.getText().equals(USERNAME) && password.getText().equals(PASSWORD)) {
+            message.setVisible(false);
+            homepage();
+            return;
+        }
+        username.pseudoClassStateChanged(Styles.STATE_DANGER, true);
+        password.pseudoClassStateChanged(Styles.STATE_DANGER, true);
+        message.setVisible(true);
     }
 
     public void register() {
+    }
+
+    private void homepage() {
+        Main.stage.setScene(HomeController.getScene());
     }
 }

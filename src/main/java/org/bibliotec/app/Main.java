@@ -10,8 +10,11 @@ import java.io.IOException;
 
 public class Main extends Application {
 
+    public static Stage stage;
+
     @Override
     public void start(Stage stage) throws IOException {
+        Main.stage = stage;
         stage.setTitle("Bibliotec");
         Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
         stage.setScene(new Scene(FXMLLoader.load(Main.class.getResource("login.fxml"))));
