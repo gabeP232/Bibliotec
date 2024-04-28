@@ -1,5 +1,8 @@
 package org.bibliotec.app;
 
+import org.apache.ibatis.jdbc.ScriptRunner;
+
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -22,7 +25,12 @@ public class DatabaseAccess {
                 Class.forName("com.mysql.cj.jdbc.Driver");
                 connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", "An15no35gabe!");
                 System.out.println(connection);
-            } catch (ClassNotFoundException | SQLException e) {
+
+                ScriptRunner scriptRunner = new ScriptRunner(connection);
+                scriptRunner.setSendFullScript(true);
+                scriptRunner.setStopOnError(true);
+                scriptRunner.runScript(new java.io.FileReader(String.valueOf(DatabaseAccess.class.getResource("bibliotec.sql"))));
+            } catch (ClassNotFoundException | SQLException | FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -64,5 +72,14 @@ public class DatabaseAccess {
         // add book to database
     }
 
+    public static boolean registerUser(String username, String password) {
+        try (var stmt = connection().prepareStatement("INSERT INTO LOGIN (username, password) VALUES (?, ?)")) {
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+            return stmt.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

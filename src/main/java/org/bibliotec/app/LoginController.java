@@ -93,13 +93,8 @@ public class LoginController {
             }
             errorMessage.setVisible(failed);
             if (!failed) {
-//                DatabaseAccess.addUser(new DatabaseAccess.User(username.getText(), password.getText()));
-                Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", "An15no35gabe!");
-                Statement stm = con.createStatement();
-                String sql = "INSERT INTO LOGIN (username, password) VALUES ('" + username.getText() + "', '" + password.getText() + "')";
-                stm.execute(sql);
-
-
+//
+                DatabaseAccess.registerUser(username.getText(), password.getText());
                 System.out.println("Registered: " + username.getText() + " with password: " + password.getText());
                 registering.set(false);
                 HomeController.show();

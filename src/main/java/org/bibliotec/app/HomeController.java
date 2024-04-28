@@ -69,7 +69,7 @@ public class HomeController {
             });
             column.setOnEditCommit(event -> {
                 String newValue = event.getNewValue();
-                R recordInstance = event.getRowValue();
+//                R recordInstance = event.getRowValue();
                 // save the data
             });
             column.setCellFactory(TextFieldTableCell.forTableColumn());
