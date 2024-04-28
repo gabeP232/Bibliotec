@@ -9,8 +9,7 @@ class DatabaseAccessTest {
 
     @Test
     void login() {
-        assertThat(DatabaseAccess.login("admin", "password")).isTrue();
-        assertThat(DatabaseAccess.login("admin", "password")).isFalse();
+        assertThat(DatabaseAccess.getLogin().
     }
 
     @Test
@@ -24,3 +23,4 @@ class DatabaseAccessTest {
         System.out.println("Hello world!");
     }
 }
+

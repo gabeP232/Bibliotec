@@ -8,14 +8,18 @@ public class DatabaseAccess {
     record User(String name, String email, String username, String password) {}
     record Patron(String name, String email) {}
     record Loan(User user, Book book, String date) {}
+    record Admin(String username, String password) {}
 
     public static void initialize() {
         // initialize database, creating tables if doesn't exist, open connection, etc...
     }
 
-    public static boolean login(String username, String password) {
+    public static List<Admin> getLogin() {
         // return true if success, false otherwise
-        return username.equals("admin") && password.equals("password");
+        return List.of(
+                new Admin("admin", "123"),
+                new Admin("admin", "admin")
+        );
     }
 
     public static List<Book> getBooks() {
@@ -41,5 +45,6 @@ public class DatabaseAccess {
     public void addBook(Book book) {
         // add book to database
     }
+
 
 }

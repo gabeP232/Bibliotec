@@ -6,6 +6,8 @@ import javafx.beans.binding.Bindings;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
+import java.sql.*;
+
 import static javafx.beans.binding.Bindings.when;
 
 public class LoginController {
@@ -28,8 +30,22 @@ public class LoginController {
         ));
     }
 
-    public void login() {
-        if (username.getText().equals(USERNAME) && password.getText().equals(PASSWORD)) {
+    public void login() throws SQLException, ClassNotFoundException {
+
+
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", "An15no35gabe!");
+        System.out.println(con);
+
+        String username2 = username.getText();
+        String password2 = password.getText();
+
+        Statement stm = con.createStatement();
+        String sql = "SELECT * FROM LOGIN where username ='" + username2 + "' and password='" + password2 + "'";
+        ResultSet rs = stm.executeQuery(sql);
+
+        if (rs.next()) {
             message.setVisible(false);
             homepage();
             return;
@@ -39,7 +55,8 @@ public class LoginController {
         message.setVisible(true);
     }
 
-    public void register() {
+
+        public void register() {
     }
 
     private void homepage() {
