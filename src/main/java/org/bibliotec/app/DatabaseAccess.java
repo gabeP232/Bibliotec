@@ -92,6 +92,41 @@ public class DatabaseAccess {
         return patrons;
     }
 
+    public static void addPatrons(Patron patrons) {
+        // add book to database
+        try (var stmt = connection().prepareStatement("INSERT INTO Patron (name, phoneNum, address, id) VALUES (?, ?, ?, ?, ?)")) {
+
+            // Set parameters
+            stmt.setString(1, patrons.name);
+            stmt.setString(2, patrons.phoneNum);
+            stmt.setString(3, patrons.address);
+            stmt.setInt(4, patrons.id);
+
+            int rowsInserted = stmt.executeUpdate();
+            if (rowsInserted > 0) {
+                System.out.println("A new Patron was added successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void removePatron(int id) {
+        try (var stmt = connection().prepareStatement("DELETE FROM patron WHERE id = ?")) {
+            stmt.setInt(1, id);
+
+            int rowsDeleted = stmt.executeUpdate();
+            if (rowsDeleted > 0) {
+                System.out.println("Patron with ID " + id + " was deleted successfully.");
+            } else {
+                System.out.println("No Patron with ID" + id + " was found.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static List<User> getUsers() {
         List<User> users = new ArrayList<>();
         try (var stmt = connection().prepareStatement("SELECT * FROM login")) {
@@ -110,9 +145,6 @@ public class DatabaseAccess {
         }
         return users;
 
-//        return List.of(
-//            new User("John Doe", "john@doe.com", "johndoe", "password")
-//        );
     }
 
     public static void addBook(Book book) {
@@ -148,10 +180,6 @@ public class DatabaseAccess {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void removePatron(int id) {
-        // TODO
     }
 
     public static boolean registerUser(String username, String password) {

@@ -46,5 +46,15 @@ class DatabaseAccessTest {
     void deleteBooks() {
         DatabaseAccess.removeBook("isbn");
     }
+
+    @Test
+    void addPatrons() {
+        DatabaseAccess.Patron pt = new DatabaseAccess.Patron("Jerry", "408345093", "123 SJ St.", 1);
+    }
+
+    @Test
+    void deletePatrons() {
+        DatabaseAccess.removePatron(1);
+    }
 }
 
