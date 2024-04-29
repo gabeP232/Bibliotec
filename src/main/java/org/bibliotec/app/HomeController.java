@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.Map;
 
 public class HomeController {
@@ -38,7 +39,7 @@ public class HomeController {
     }
 
     @SuppressWarnings("unchecked")
-    public void initialize() {
+    public void initialize() throws SQLException {
         tabs.selectedToggleProperty().addListener((__, oldVal, selected) -> {
             if (selected == null) {
                 oldVal.setSelected(true);
