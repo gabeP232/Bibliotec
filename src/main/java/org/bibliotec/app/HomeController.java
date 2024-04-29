@@ -12,18 +12,20 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
+import org.bibliotec.app.DatabaseAccess.Book;
+import org.bibliotec.app.DatabaseAccess.Loan;
+import org.bibliotec.app.DatabaseAccess.Patron;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import java.util.Map;
 
 public class HomeController {
 
     private static Scene scene;
 
-    @SuppressWarnings("rawtypes") @FXML private TableView booksTable, loansTable;
+    @SuppressWarnings("rawtypes") @FXML private TableView booksTable, patronsTable, patronLoansTable, loansTable;
     @FXML private ToggleGroup tabs;
 
     public static void show() {
@@ -39,7 +41,7 @@ public class HomeController {
     }
 
     @SuppressWarnings("unchecked")
-    public void initialize() throws SQLException {
+    public void initialize() {
         tabs.selectedToggleProperty().addListener((__, oldVal, selected) -> {
             if (selected == null) {
                 oldVal.setSelected(true);
@@ -48,7 +50,20 @@ public class HomeController {
                 childs.set(childs.size() - 1, (Node) selected.getUserData());
             }
         });
-        columnsFromRecord(booksTable, DatabaseAccess.Book.class,
+
+        columnsFromRecord(loansTable, Loan.class,
+                Map.of("user", "User", "book", "Book", "date", "Date"));
+        loansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoans()));
+
+        columnsFromRecord(patronsTable, Patron.class,
+                Map.of("name", "Name", "phoneNum", "Phone Number", "address", "Address", "id", "ID"));
+        patronsTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getPatrons()));
+        columnsFromRecord(patronLoansTable, Loan.class,
+                Map.of("book", "Book", "date", "Date"));
+        patronLoansTable.itemsProperty().bind(patronsTable.getSelectionModel().selectedItemProperty().map(patron ->
+                FXCollections.observableArrayList(DatabaseAccess.getLoansForPatron(((Patron) patron).id()))));
+
+        columnsFromRecord(booksTable, Book.class,
                 Map.of("title", "Title", "author", "Author", "isbn", "ISBN", "genre", "Genre", "publisher", "Publisher", "year", "Year", "pages", "Pages"));
         booksTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getBooks()));
     }
@@ -57,7 +72,9 @@ public class HomeController {
 
     private static <R extends Record> void columnsFromRecord(TableView<R> table, Class<R> record, Map<String, String> columnNames) {
         for (var component : record.getRecordComponents()) {
-            var column = new TableColumn<R, String>(columnNames.getOrDefault(component.getName(), component.getName()));
+            if (!columnNames.containsKey(component.getName())) continue;
+
+            var column = new TableColumn<R, String>(columnNames.get(component.getName()));
             column.setCellValueFactory(cellData -> {
                 try {
                     if (cellData.getValue() == null || cellData.getValue() == placeholder) {
@@ -93,10 +110,11 @@ public class HomeController {
         var table = (TableView) ((Node) actionEvent.getTarget()).getUserData();
         var item = table.getSelectionModel().getSelectedItem();
         table.getItems().remove(item);
-        if (item instanceof DatabaseAccess.Book book) {
-            DatabaseAccess.removeBook(book.isbn());
-        } else if (item instanceof DatabaseAccess.Patron patron) {
-            DatabaseAccess.removePatron(patron.id());
+        switch (item) {
+            case Book book -> DatabaseAccess.removeBook(book.isbn());
+            case Patron patron -> DatabaseAccess.removePatron(patron.id());
+            case Loan loan -> DatabaseAccess.removeLoan(loan);
+            default -> {}
         }
     }
 }

@@ -147,6 +147,18 @@ public class DatabaseAccess {
 
     }
 
+    public static List<Loan> getLoans() {
+        return List.of(
+            new Loan(new User("John Doe", "password"), new Book("Book Title", "Author", "ISBN", "Publisher", 2021), "2021-01-01")
+        );
+    }
+
+    public static List<Loan> getLoansForPatron(int patronId) {
+        return List.of(
+            new Loan(null, new Book("Book Title", "Author", "ISBN", "Publisher", 2021), "2021-01-01")
+        );
+    }
+
     public static void addBook(Book book) {
         // add book to database
         try (var stmt = connection().prepareStatement("INSERT INTO books (bookName, author, isbn, publisher, year) VALUES (?, ?, ?, ?, ?)")) {
@@ -164,7 +176,6 @@ public class DatabaseAccess {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
     public static void removeBook(String isbn) {
@@ -180,6 +191,10 @@ public class DatabaseAccess {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void removeLoan(Loan loan) {
+
     }
 
     public static boolean registerUser(String username, String password) {
