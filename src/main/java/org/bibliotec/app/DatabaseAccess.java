@@ -5,7 +5,6 @@ import org.apache.ibatis.jdbc.ScriptRunner;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +48,7 @@ public class DatabaseAccess {
         }
     }
 
-    public static List<Book> getBooks() throws SQLException {
+    public static List<Book> getBooks() {
         // return list of books
         List<Book> books = new ArrayList<>();
         try (var stmt = connection().prepareStatement("SELECT * FROM books")) {
@@ -63,17 +62,13 @@ public class DatabaseAccess {
 
                 Book bk = new Book(title, author, isbn, publisher, year);
                 books.add(bk);
-                System.out.println("Title: " + title + ", Author: " + author + ", ISBN: " + isbn + ", Publisher: " + publisher + ", Year: " + year);
+                System.out.println(bk);
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return books;
-//        return List.of(
-//            new Book("The Great Gatsby", "F. Scott Fitzgerald", "9780743273565", "Novel", "Scribner", 1925, 180),
-//            new Book("To Kill a Mockingbird", "Harper Lee", "9780061120084", "Novel", "J. B. Lippincott & Co.", 1960, 281)
-//        );
     }
 
     public static List<Patron> getPatrons() {
@@ -89,16 +84,12 @@ public class DatabaseAccess {
 
                 Patron ptr = new Patron(name, phoneNum, address, id);
                 patrons.add(ptr);
-                System.out.println("Name: " + id + ", Phone: " + phoneNum + ", Address: " + address + ", Name: " + id);
+                System.out.println(patrons);
             }
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return patrons;
-
-//        return List.of(
-//                new Patron("Bob", "bob@gmail.com"));
     }
 
     public static List<User> getUsers() {
@@ -128,23 +119,16 @@ public class DatabaseAccess {
         // add book to database
         try (var stmt = connection().prepareStatement("INSERT INTO books (bookName, author, isbn, publisher, year) VALUES (?, ?, ?, ?, ?)")) {
 
-            // Set parameters\\
+            // Set parameters
             stmt.setString(1, book.title);
             stmt.setString(2, book.author);
             stmt.setString(3, book.isbn);
             stmt.setString(4, book.publisher);
             stmt.setInt(5, book.year);
-//            stmt.getResultSet().getString(1);
-//            stmt.getResultSet().getString(2);
-//            stmt.getResultSet().getString(3);
-//            stmt.getResultSet().getString(4);
-//            stmt.getResultSet().getInt(5);
-            // Execute the statement
             int rowsInserted = stmt.executeUpdate();
             if (rowsInserted > 0) {
                 System.out.println("A new book was added successfully.");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -153,7 +137,6 @@ public class DatabaseAccess {
 
     public static void removeBook(String isbn) {
         try (var stmt = connection().prepareStatement("DELETE FROM books WHERE isbn = ?")) {
-
             stmt.setString(1, isbn);
 
             int rowsDeleted = stmt.executeUpdate();
@@ -165,6 +148,10 @@ public class DatabaseAccess {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void removePatron(int id) {
+        // TODO
     }
 
     public static boolean registerUser(String username, String password) {

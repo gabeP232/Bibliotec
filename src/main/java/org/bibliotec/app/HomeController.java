@@ -55,7 +55,7 @@ public class HomeController {
 
     private static final Object placeholder = new Object();
 
-    private static<R extends Record> void columnsFromRecord(TableView<R> table, Class<R> record, Map<String, String> columnNames) {
+    private static <R extends Record> void columnsFromRecord(TableView<R> table, Class<R> record, Map<String, String> columnNames) {
         for (var component : record.getRecordComponents()) {
             var column = new TableColumn<R, String>(columnNames.getOrDefault(component.getName(), component.getName()));
             column.setCellValueFactory(cellData -> {
@@ -91,6 +91,12 @@ public class HomeController {
     @SuppressWarnings("rawtypes")
     public void delete(ActionEvent actionEvent) {
         var table = (TableView) ((Node) actionEvent.getTarget()).getUserData();
-        table.getItems().remove(table.getSelectionModel().getSelectedItem());
+        var item = table.getSelectionModel().getSelectedItem();
+        table.getItems().remove(item);
+        if (item instanceof DatabaseAccess.Book book) {
+            DatabaseAccess.removeBook(book.isbn());
+        } else if (item instanceof DatabaseAccess.Patron patron) {
+            DatabaseAccess.removePatron(patron.id());
+        }
     }
 }
