@@ -52,16 +52,24 @@ public class HomeController {
         });
 
         columnsFromRecord(loansTable, Loan.class,
-                Map.of("user", "User", "book", "Book", "date", "Date"));
+                Map.of("checkoutID", "Checkout ID", "bookName", "Book", "patronID", "Patron", "returnDate", "Return Date"));
         loansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoans()));
 
         columnsFromRecord(patronsTable, Patron.class,
                 Map.of("name", "Name", "phoneNum", "Phone Number", "address", "Address", "id", "ID"));
         patronsTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getPatrons()));
+
         columnsFromRecord(patronLoansTable, Loan.class,
-                Map.of("book", "Book", "date", "Date"));
-        patronLoansTable.itemsProperty().bind(patronsTable.getSelectionModel().selectedItemProperty().map(patron ->
-                FXCollections.observableArrayList(DatabaseAccess.getLoansForPatron(((Patron) patron).id()))));
+                Map.of("checkoutID", "Checkout ID", "bookName", "Book", "patronID", "Patron", "returnDate", "Return Date"));
+        patronsTable.getSelectionModel().selectedItemProperty().addListener((__, ___, selected) -> {
+            if (selected == null) {
+                patronLoansTable.setItems(FXCollections.emptyObservableList());
+            } else if (selected instanceof Patron patron) {
+                System.out.println("Selected: " + selected);
+                patronLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForPatron(patron.id())));
+                System.out.println(patronLoansTable.getItems());
+            }
+        });
 
         columnsFromRecord(booksTable, Book.class,
                 Map.of("title", "Title", "author", "Author", "isbn", "ISBN", "genre", "Genre", "publisher", "Publisher", "year", "Year", "pages", "Pages"));

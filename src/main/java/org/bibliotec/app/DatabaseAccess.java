@@ -17,7 +17,7 @@ public class DatabaseAccess {
 //    record User(String name, String email, String username, String password) {}
     record Patron(String name, String phoneNum, String address, int id) {}
 //    record Patron(String name, String email) {}
-    record Loan(User user, Book book, String date) {}
+    record Loan(String checkoutID, String bookName, String patronID, String returnDate) {}
     record Admin(String username, String password) {}
 
     private static Connection connection;
@@ -27,10 +27,10 @@ public class DatabaseAccess {
         if (connection == null) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                try (var rootConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "An15no35gabe!")) {
+                try (var rootConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", null)) {
                     new ScriptRunner(rootConnection).runScript(new InputStreamReader(DatabaseAccess.class.getResourceAsStream("bibliotec.sql")));
                 }
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", "An15no35gabe!");
+                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", null);
             } catch (ClassNotFoundException | SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -85,9 +85,8 @@ public class DatabaseAccess {
                 String address = stmt.getResultSet().getString(3);
                 int id = stmt.getResultSet().getInt(4);
 
-                Patron ptr = new Patron(name, phoneNum, address, id);
-                patrons.add(ptr);
-                System.out.println(patrons);
+                patrons.add(new Patron(name, phoneNum, address, id));
+//                System.out.println(patrons.getLast());
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -97,7 +96,7 @@ public class DatabaseAccess {
 
     public static void addPatrons(Patron patrons) {
         // add book to database
-        try (var stmt = connection().prepareStatement("INSERT INTO Patron (name, phoneNum, address, id) VALUES (?, ?, ?, ?, ?)")) {
+        try (var stmt = connection().prepareStatement("INSERT INTO patrons (name, phoneNum, address, patronID) VALUES (?, ?, ?, ?, ?)")) {
 
             // Set parameters
             stmt.setString(1, patrons.name);
@@ -116,7 +115,7 @@ public class DatabaseAccess {
     }
 
     public static void removePatron(int id) {
-        try (var stmt = connection().prepareStatement("DELETE FROM patron WHERE id = ?")) {
+        try (var stmt = connection().prepareStatement("DELETE FROM patrons WHERE patronID = ?")) {
             stmt.setInt(1, id);
 
             int rowsDeleted = stmt.executeUpdate();
@@ -151,27 +150,55 @@ public class DatabaseAccess {
     }
 
     public static List<Loan> getLoans() {
-        return List.of(
-            new Loan(new User("John Doe", "password"), new Book("Book Title", "Author", "ISBN", "Publisher", 2021), "2021-01-01")
-        );
+        List<Loan> loans = new ArrayList<>();
+        try (var stmt = connection().prepareStatement("SELECT * FROM checkout")) {
+            stmt.execute();
+            while (stmt.getResultSet().next()) {
+                String checkoutID = stmt.getResultSet().getString(1);
+                String bookName = stmt.getResultSet().getString(2);
+                String patronID = stmt.getResultSet().getString(2);
+                String returnDate = stmt.getResultSet().getString(3);
+
+                loans.add(new Loan(checkoutID, bookName, patronID, returnDate));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return loans;
     }
 
-    public static List<Loan> getLoansForPatron(int patronId) {
-        return List.of(
-            new Loan(null, new Book("Book Title", "Author", "ISBN", "Publisher", 2021), "2021-01-01")
-        );
+    public static List<Loan> getLoansForPatron(int patronIdent) {
+        List<Loan> loans = new ArrayList<>();
+        try (var stmt = connection().prepareStatement("SELECT * FROM checkout WHERE patronID = ?")) {
+            stmt.setInt(1, patronIdent);
+            stmt.execute();
+            while (stmt.getResultSet().next()) {
+                String checkoutID = stmt.getResultSet().getString(1);
+                String bookName = stmt.getResultSet().getString(2);
+                String patronID = stmt.getResultSet().getString(2);
+                String returnDate = stmt.getResultSet().getString(3);
+
+                loans.add(new Loan(checkoutID, bookName, patronID, returnDate));
+//                System.out.println("Checkout ID: " + checkoutID + ", Book: " + title + ", Date: " + date);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return loans;
     }
 
     public static void addBook(Book book) {
         // add book to database
-        try (var stmt = connection().prepareStatement("INSERT INTO books (bookName, author, isbn, publisher, year) VALUES (?, ?, ?, ?, ?)")) {
+        try (var stmt = connection().prepareStatement("INSERT INTO books (bookName, author, isbn, publisher) VALUES (?, ?, ?, ?)")) {
 
             // Set parameters
             stmt.setString(1, book.title);
             stmt.setString(2, book.author);
             stmt.setString(3, book.isbn);
             stmt.setString(4, book.publisher);
-            stmt.setInt(5, book.year);
+//            stmt.setInt(5, book.year);
             int rowsInserted = stmt.executeUpdate();
             if (rowsInserted > 0) {
                 System.out.println("A new book was added successfully.");
