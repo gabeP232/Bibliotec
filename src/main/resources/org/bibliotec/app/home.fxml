@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.controlsfx.control.MasterDetailPane?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="org.bibliotec.app.HomeController"
-      spacing="20" minHeight="400" minWidth="350">
+      spacing="20" minHeight="500" minWidth="800">
     <padding>
         <Insets bottom="20" left="20" right="20" top="20"/>
     </padding>
@@ -17,7 +17,7 @@
         <ToggleGroup fx:id="tabs"/>
         <MasterDetailPane>
             <masterNode>
-                <AnchorPane fx:id="booksView">
+                <AnchorPane fx:id="booksView" VBox.vgrow="ALWAYS">
                     <TableView fx:id="booksTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
                     <ToolBar AnchorPane.bottomAnchor="0">
                         <Button text="Add" onAction="#add" userData="$booksTable"/>
@@ -43,7 +43,7 @@
                 <TableView fx:id="patronLoansTable" editable="true"/>
             </detailNode>
         </MasterDetailPane>
-        <AnchorPane fx:id="loansView">
+        <AnchorPane fx:id="loansView" VBox.vgrow="ALWAYS">
             <TableView fx:id="loansTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
             <ToolBar AnchorPane.bottomAnchor="0">
                 <Button text="Add" onAction="#add" userData="$loansTable"/>

@@ -76,7 +76,7 @@ public class LoginController {
         }
     }
 
-    public void register() throws SQLException {
+    public void register() {
         if (registering.get()) {
             boolean failed = false;
             if (username.getText().length() < 4) {
@@ -93,7 +93,6 @@ public class LoginController {
             }
             errorMessage.setVisible(failed);
             if (!failed) {
-//
                 DatabaseAccess.registerUser(username.getText(), password.getText());
                 System.out.println("Registered: " + username.getText() + " with password: " + password.getText());
                 registering.set(false);

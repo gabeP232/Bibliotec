@@ -11,7 +11,7 @@
         <Insets bottom="20" left="20" right="20" top="20"/>
     </padding>
     <HBox alignment="CENTER">
-        <Label text="Welcome"/>
+        <Label text="Welcome to Bibliotec"/>
     </HBox>
     <TextField fx:id="username" promptText="Username"/>
     <PasswordField fx:id="password" promptText="Password"/>

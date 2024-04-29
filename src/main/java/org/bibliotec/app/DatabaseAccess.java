@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class DatabaseAccess {
     record Book(String title, String author, String isbn, String publisher, int year) {}
@@ -48,6 +49,8 @@ public class DatabaseAccess {
         }
     }
 
+    private static final Random random = new Random();
+
     public static List<Book> getBooks() {
         // return list of books
         List<Book> books = new ArrayList<>();
@@ -58,11 +61,11 @@ public class DatabaseAccess {
                 String author = stmt.getResultSet().getString(2);
                 String isbn = stmt.getResultSet().getString(3);
                 String publisher = stmt.getResultSet().getString(4);
-                int year = stmt.getResultSet().getInt(5);
+                int year = random.nextInt(34) + 1990;
 
                 Book bk = new Book(title, author, isbn, publisher, year);
                 books.add(bk);
-                System.out.println(bk);
+//                System.out.println(bk);
             }
 
         } catch (SQLException e) {
@@ -137,7 +140,7 @@ public class DatabaseAccess {
 
                 User use = new User(username, password);
                 users.add(use);
-                System.out.println("Username: " + username + ", Password: " + password);
+//                System.out.println("Username: " + username + ", Password: " + password);
             }
 
         } catch (SQLException e) {
