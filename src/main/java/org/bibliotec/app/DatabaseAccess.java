@@ -87,7 +87,9 @@ public class DatabaseAccess {
             if (rowsInserted > 0) {
                 System.out.println("A new Patron was added successfully.");
             }
-        } catch (SQLException e) {
+        } catch (SQLIntegrityConstraintViolationException e ) {
+            throw new RuntimeException("Duplicate User ID",e);
+        }  catch (SQLException e ) {
             throw new RuntimeException(e);
         }
     }

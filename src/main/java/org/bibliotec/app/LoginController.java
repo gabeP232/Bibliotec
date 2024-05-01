@@ -23,7 +23,7 @@ public class LoginController {
 
     private static Scene scene;
 
-    @FXML private TextField username;
+    @FXML private TextField username, fullName, email, address;
     @FXML private PasswordField password, confirmPassword;
     @FXML private Message errorMessage;
     @FXML private Button login, register;
@@ -43,12 +43,19 @@ public class LoginController {
     public void initialize() {
         registering.addListener(__ -> {
             errorMessage.setVisible(false);
-            List.of(username, password, confirmPassword).forEach(node -> setRedHighlight(node, false));
+            List.of(username, fullName, password, confirmPassword, email, address).forEach(node -> setRedHighlight(node, false));
         });
         register.textProperty().bind(when(registering).then("Confirm Registration").otherwise("Register"));
         login.textProperty().bind(when(registering).then("Cancel").otherwise("Login"));
         confirmPassword.visibleProperty().bind(registering);
         confirmPassword.managedProperty().bind(confirmPassword.visibleProperty());
+        email.visibleProperty().bind(registering);
+        email.managedProperty().bind(email.visibleProperty());
+        address.visibleProperty().bind(registering);
+        address.managedProperty().bind(address.visibleProperty());
+        fullName.visibleProperty().bind(registering);
+        fullName.managedProperty().bind(fullName.visibleProperty());
+
         errorMessage.managedProperty().bind(errorMessage.visibleProperty());
         var usernameInvalid = username.textProperty().length().lessThan(4);
         var passwordInvalid = password.textProperty().length().lessThan(8);
@@ -67,9 +74,15 @@ public class LoginController {
     }
 
     public void login() {
-        var result = DatabaseAccess.login(username.getText(), password.getText());
-        errorMessage.setVisible(result.isEmpty());
-        result.ifPresent(x -> AdminController.show());
+        if(!registering.get())  {
+            var result = DatabaseAccess.login(username.getText(), password.getText());
+            errorMessage.setVisible(result.isEmpty());
+            result.ifPresent(x -> AdminController.show());
+        }
+        else {
+            registering.set(false);
+        }
+
     }
 
     public void register() {
