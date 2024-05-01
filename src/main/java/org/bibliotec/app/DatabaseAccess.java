@@ -241,42 +241,54 @@ public class DatabaseAccess {
         return getAvailableCopies(isbn) > 0;
     }
 
-    public static void addHold(Hold hold) {
+    public static Hold addHold(Hold hold) {
         if (!isBookReturned(hold.isbn)) {
-            try (var stmt = connection().prepareStatement("INSERT INTO holds (isbn, holdID, userID, holdDate) VALUES (?, ?, ?, ?)")) {
+            try (var stmt = connection().prepareStatement("INSERT INTO holds (isbn, userID, holdDate) VALUES (?, ?, ?)")) {
                 stmt.setString(1, hold.isbn);
-                stmt.setInt(2, hold.holdID);
-                stmt.setString(3, hold.userID);
-                stmt.setDate(4, Date.valueOf(hold.holdDate));
+                stmt.setString(2, hold.userID);
+                stmt.setDate(3, Date.valueOf(hold.holdDate));
 
                 int rowsInserted = stmt.executeUpdate();
                 if (rowsInserted > 0) {
                     System.out.println("A new hold was added successfully.");
+                    try (var st = connection().prepareStatement("SELECT holdID FROM holds WHERE isbn = ? AND userID = ? AND holdDate = ?")) {
+                        st.setString(1, hold.isbn);
+                        st.setString(2, hold.userID);
+                        st.setDate(3, Date.valueOf(hold.holdDate));
+                        return hold;
+                    }
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
+        return null;
     }
 
-    public static void addLoan(Loan loan) {
+    public static Loan addLoan(Loan loan) {
         if (!isBookReturned(loan.isbn)) {
-            try (var stmt = connection().prepareStatement("INSERT INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (?, ?, ?, ?, ?,?)")) {
-                stmt.setInt(1, loan.loanID);
-                stmt.setString(2, loan.isbn);
-                stmt.setString(3, loan.userID);
-                stmt.setDate(4, Date.valueOf(loan.checkoutDate));
-                stmt.setDate(5, Date.valueOf(loan.expectedReturnDate));
-                stmt.setBoolean(6, loan.returned);
+            try (var stmt = connection().prepareStatement("INSERT INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (?, ?, ?, ?,?)")) {
+                stmt.setString(1, loan.isbn);
+                stmt.setString(2, loan.userID);
+                stmt.setDate(3, Date.valueOf(loan.checkoutDate));
+                stmt.setDate(4, Date.valueOf(loan.expectedReturnDate));
+                stmt.setBoolean(5, loan.returned);
 
                 int rowsInserted = stmt.executeUpdate();
                 if (rowsInserted > 0) {
                     System.out.println("A new loan was added successfully.");
+                    try (var st = connection().prepareStatement("SELECT loanID FROM Loans WHERE isbn = ? AND userID = ? AND returned = ?")) {
+                        st.setString(1, loan.isbn);
+                        st.setString(2, loan.userID);
+                        st.setBoolean(3, loan.returned);
+                        return loan;
+                    }
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
+        return null;
     }
 
 
