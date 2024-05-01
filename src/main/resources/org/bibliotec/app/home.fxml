@@ -3,9 +3,7 @@
 <?import atlantafx.base.layout.InputGroup?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <?import org.controlsfx.control.MasterDetailPane?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="org.bibliotec.app.HomeController"
       spacing="20" minHeight="550" minWidth="1100">
@@ -18,7 +16,8 @@
         <MasterDetailPane fx:id="booksView" dividerPosition="0.7" VBox.vgrow="ALWAYS">
             <masterNode>
                 <AnchorPane>
-                    <TableView fx:id="booksTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+                    <TableView fx:id="booksTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                               AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
                     <ToolBar AnchorPane.bottomAnchor="0">
                         <Button text="Add" onAction="#add" userData="$booksTable"/>
                         <Button text="Delete" onAction="#delete" userData="$booksTable"/>
@@ -32,7 +31,8 @@
         <MasterDetailPane fx:id="patronsView" detailSide="RIGHT" dividerPosition="0.6" VBox.vgrow="ALWAYS">
             <masterNode>
                 <AnchorPane>
-                    <TableView fx:id="patronsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+                    <TableView fx:id="patronsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                               AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
                     <ToolBar AnchorPane.bottomAnchor="0">
                         <Button text="Add" onAction="#add" userData="$patronsTable"/>
                         <Button text="Delete" onAction="#delete" userData="$patronsTable"/>
@@ -44,14 +44,16 @@
             </detailNode>
         </MasterDetailPane>
         <AnchorPane fx:id="holdsView" VBox.vgrow="ALWAYS">
-            <TableView fx:id="holdsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+            <TableView fx:id="holdsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                       AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
             <ToolBar AnchorPane.bottomAnchor="0">
                 <Button text="Add" onAction="#add" userData="$holdsTable"/>
                 <Button text="Delete" onAction="#delete" userData="$holdsTable"/>
             </ToolBar>
         </AnchorPane>
         <AnchorPane fx:id="loansView" VBox.vgrow="ALWAYS">
-            <TableView fx:id="loansTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+            <TableView fx:id="loansTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                       AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
             <ToolBar AnchorPane.bottomAnchor="0">
                 <Button text="Add" onAction="#add" userData="$loansTable"/>
                 <Button text="Delete" onAction="#delete" userData="$loansTable"/>
