@@ -29,7 +29,7 @@
                 <TableView fx:id="bookLoansTable" minWidth="500" editable="true"/>
             </detailNode>
         </MasterDetailPane>
-        <MasterDetailPane fx:id="patronsView" detailSide="RIGHT" dividerPosition="0.7" VBox.vgrow="ALWAYS">
+        <MasterDetailPane fx:id="patronsView" detailSide="RIGHT" dividerPosition="0.6" VBox.vgrow="ALWAYS">
             <masterNode>
                 <AnchorPane>
                     <TableView fx:id="patronsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>

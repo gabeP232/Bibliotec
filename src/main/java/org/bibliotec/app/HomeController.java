@@ -56,11 +56,11 @@ public class HomeController {
         loansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoans()));
 
         columnsFromRecord(patronsTable, User.class,
-                Map.of("userID", "User ID", "fullName", "Name", "email", "Email", "address", "Address", "password", "Password"));
+                Map.of("userID", "User ID", "fullName", "Name", "email", "Email", "address", "Address"));
         patronsTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getPatrons()));
 
         columnsFromRecord(patronLoansTable, Loan.class,
-                Map.of("loanID", "Loan ID", "isbn", "ISBN", "checkoutDate", "Check Out Date", "expectedReturnDate", "Expected Return Date", "returned", "Is Returned"));
+                Map.of("loanID", "Loan ID", "isbn", "ISBN", "checkoutDate", "Checkout Date", "expectedReturnDate", "Expected Return Date", "returned", "Is Returned"));
         patronsTable.getSelectionModel().selectedItemProperty().addListener((__, ___, selected) -> {
             if (selected == null) {
                 patronLoansTable.setItems(FXCollections.emptyObservableList());
@@ -72,12 +72,12 @@ public class HomeController {
         });
 
         columnsFromRecord(bookLoansTable, Loan.class,
-                Map.of("checkoutID", "Checkout ID", "patronID", "Patron", "returnDate", "Return Date"));
+                Map.of("loanID", "Loan ID", "checkoutDate", "Checkout Date", "expectedReturnDate", "Expected Return Date", "returned", "Is Returned"));
         booksTable.getSelectionModel().selectedItemProperty().addListener((__, ___, selected) -> {
             if (selected == null) {
                 bookLoansTable.setItems(FXCollections.emptyObservableList());
             } else if (selected instanceof Book book) {
-                bookLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForBook(book.bookName())));
+                bookLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForBook(book.isbn())));
             }
         });
 

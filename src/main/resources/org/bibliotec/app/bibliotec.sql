@@ -68,10 +68,10 @@ INSERT IGNORE INTO books (bookName, author, isbn, publisher, genre) VALUES ('Eng
 INSERT IGNORE INTO books (bookName, author, isbn, publisher, genre) VALUES ('Steve Jobs', 'Walter Isaacson', '978-1451648539', 'Simon & Schuster', 'Biography');
 INSERT IGNORE INTO books (bookName, author, isbn, publisher, genre) VALUES ('The 7 Habits of Highly Effective People', 'Stephen R. Covey', '978-1982137274', 'Simon & Schuster', 'Self-Help');
 
-INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('John Doe', '123-456-7890', '123 Main St', 'johndoe', 'password');
-INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Jane Doe', '123-456-7890', '123 First St', 'janedoe', 'password');
-INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Bob Smith', '123-456-7890', '123 Second St', 'bobsmith', 'password');
-INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('James Stewart', '123-456-7890', '123 Third St', 'jstewart', 'password');
+INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('John Doe', 'john@doe.com', '123 Main St', 'johndoe', 'password');
+INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Jane Doe', 'jane@doe.com', '123 First St', 'janedoe', 'password');
+INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Bob Smith', 'bob@smith.com', '123 Second St', 'bobsmith', 'password');
+INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('James Stewart', 'james@stewart.com', '123 Third St', 'jstewart', 'password');
 
 INSERT IGNORE INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (1, '978-0439708180', 'johndoe', '2021-01-01', '2021-01-15', FALSE);
 INSERT IGNORE INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (2, '978-0345534835', 'janedoe', '2021-01-01', '2021-01-15', FALSE);
