@@ -281,7 +281,8 @@ public class DatabaseAccess {
                         st.setString(1, loan.isbn);
                         st.setString(2, loan.userID);
                         st.setBoolean(3, loan.returned);
-                        return loan;
+                        Loan loan2 = new Loan(loan.loanID, loan.isbn, loan.userID, loan.checkoutDate, loan.expectedReturnDate, loan.returned);
+                        return loan2;
                     }
                 }
             } catch (SQLException e) {

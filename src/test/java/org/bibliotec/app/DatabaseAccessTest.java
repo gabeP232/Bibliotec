@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.xml.crypto.Data;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -62,5 +63,12 @@ class DatabaseAccessTest {
 //        DatabaseAccess.Hold hld = new DatabaseAccess.Hold("")
 //        DatabaseAccess.addHold();
 //    }
+
+    @Test
+    void addLoan() {
+        DatabaseAccess.Loan loan;
+        loan = new DatabaseAccess.Loan(1, "978-1982137274", "Toed", LocalDate.of(2024, 8, 16), LocalDate.of(2024, 9, 23), false);
+
+    }
 }
 
