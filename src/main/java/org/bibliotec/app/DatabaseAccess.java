@@ -191,12 +191,13 @@ public class DatabaseAccess {
         return loans;
     }
 
-    public static User getPatronForLoan(Loan loan) {
+    public static Optional<User> getPatronForLoan(Loan loan) {
         try (var stmt = connection().prepareStatement("SELECT * FROM users WHERE userID = ?")) {
             stmt.setString(1, loan.userID);
             ResultSet rs = stmt.executeQuery();
-            return rs.next() ? new User(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getBoolean(6))
-                    : null;
+            return rs.next() ?
+                    Optional.of(new User(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getBoolean(6)))
+                    : Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -244,7 +245,7 @@ public class DatabaseAccess {
                 totalCopiesStmt.setString(1, isbn);
                 rs = totalCopiesStmt.executeQuery();
                 int totalCopies = rs.next() ? rs.getInt(1) : 0;
-                return totalCopies - checkedOutCopies;
+                return Math.max(totalCopies - checkedOutCopies, 0);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -255,7 +256,7 @@ public class DatabaseAccess {
         return getAvailableCopies(isbn) > 0;
     }
 
-    public static Hold addHold(Hold hold) {
+    public static Optional<Hold> addHold(Hold hold) {
         if (!isBookAvailable(hold.isbn)) {
             try (var stmt = connection().prepareStatement("INSERT INTO holds (isbn, userID, holdDate) VALUES (?, ?, ?)")) {
                 stmt.setString(1, hold.isbn);
@@ -271,17 +272,18 @@ public class DatabaseAccess {
                         st.setDate(3, Date.valueOf(hold.holdDate));
 
                         ResultSet rs = st.executeQuery();
-                        return rs.next() ? new Hold(hold.isbn, rs.getInt(1), hold.userID, hold.holdDate) : null;
+                        return rs.next() ? Optional.of(new Hold(hold.isbn, rs.getInt(1), hold.userID, hold.holdDate))
+                                : Optional.empty();
                     }
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
-    public static Loan addLoan(Loan loan) {
+    public static Optional<Loan> addLoan(Loan loan) {
         if (isBookAvailable(loan.isbn)) {
             try (var stmt = connection().prepareStatement("INSERT INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (?, ?, ?, ?,?)")) {
                 stmt.setString(1, loan.isbn);
@@ -299,14 +301,16 @@ public class DatabaseAccess {
                         st.setBoolean(4, loan.returned);
 
                         ResultSet rs = st.executeQuery();
-                        return rs.next() ? new Loan(rs.getInt(0), loan.isbn, loan.userID, loan.checkoutDate, loan.expectedReturnDate, loan.returned) : null;
+                        return rs.next() ?
+                                Optional.of(new Loan(rs.getInt(0), loan.isbn, loan.userID, loan.checkoutDate, loan.expectedReturnDate, loan.returned))
+                                : Optional.empty();
                     }
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
 
@@ -321,6 +325,19 @@ public class DatabaseAccess {
 
             } else {
                 System.out.println("No book with ISBN " + loan.isbn + " was found in loans.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void removeHold(int holdID) {
+        try (var stmt = connection().prepareStatement("DELETE FROM holds WHERE holdID = ?")) {
+            stmt.setInt(1, holdID);
+
+            int rowsDeleted = stmt.executeUpdate();
+            if (rowsDeleted > 0) {
+                System.out.println("Hold with ID " + holdID + " was successfully removed.");
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

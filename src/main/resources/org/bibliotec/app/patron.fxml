@@ -16,7 +16,7 @@
             <TableView fx:id="booksTable" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
                        AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
             <ToolBar AnchorPane.bottomAnchor="0">
-                <Button text="Hold" onAction="#hold" userData="$booksTable"/>
+                <Button fx:id="holdButton" text="Hold" onAction="#hold" userData="$booksTable"/>
             </ToolBar>
         </AnchorPane>
         <AnchorPane fx:id="loansView" VBox.vgrow="ALWAYS">
@@ -27,7 +27,7 @@
             <TableView fx:id="holdsTable" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
                        AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
             <ToolBar AnchorPane.bottomAnchor="0">
-                <Button text="Delete" onAction="#delete" userData="$holdsTable"/>
+                <Button text="Cancel Hold" onAction="#cancelHold" userData="$holdsTable"/>
             </ToolBar>
         </AnchorPane>
         <VBox fx:id="profileView" alignment="CENTER">

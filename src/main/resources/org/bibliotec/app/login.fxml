@@ -26,7 +26,7 @@
     <TextField fx:id="address" promptText="Address"/>
     <Message fx:id="errorMessage" title="Error" description="" styleClass="danger" visible="false" managed="false"/>
     <HBox alignment="CENTER" spacing="20">
-        <Button fx:id="login" text="Login" onAction="#login"/>
+        <Button fx:id="login" text="Login" onAction="#login" defaultButton="true"/>
         <Button fx:id="register" text="Register" onAction="#register"/>
     </HBox>
 </VBox>

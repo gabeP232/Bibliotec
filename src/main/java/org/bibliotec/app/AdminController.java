@@ -151,6 +151,7 @@ public class AdminController {
             case Book book -> DatabaseAccess.removeBook(book.isbn());
             case User patron -> DatabaseAccess.removePatron(patron.userID());
             case Loan loan -> DatabaseAccess.removeLoan(loan);
+            case Hold hold -> DatabaseAccess.removeHold(hold.holdID());
             default -> {}
         }
     }

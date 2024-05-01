@@ -4,15 +4,11 @@ import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.layout.VBox;
 import org.bibliotec.app.DatabaseAccess.Book;
@@ -22,6 +18,7 @@ import org.bibliotec.app.DatabaseAccess.Loan;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
 import java.util.Map;
 
 public class PatronController {
@@ -31,6 +28,7 @@ public class PatronController {
     @SuppressWarnings("rawtypes") @FXML
     private TableView booksTable, loansTable, holdsTable;
     @FXML private TextField nameField, emailField, addressField;
+    @FXML private Button holdButton;
     @FXML private ToggleGroup tabs;
 
     public static void show(String userID) {
@@ -74,6 +72,11 @@ public class PatronController {
         columnsFromRecord(booksTable, Book.class,
                 Map.of("bookName", "Title", "author", "Author", "isbn", "ISBN", "publisher", "Publisher", "genre", "Genre", "totalCopies", "Total Copies"));
         booksTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getBooks()));
+        var availableCopies = new TableColumn<Book, String>("Available Copies");
+        availableCopies.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(String.valueOf(DatabaseAccess.getAvailableCopies(cellData.getValue().isbn()))));
+        booksTable.getColumns().add(availableCopies);
+
+//        holdButton.disableProperty().bind(booksTable.getSelectionModel().selectedItemProperty().(item -> !(item instanceof Book book && DatabaseAccess.getAvailableCopies(book.isbn()) > 0));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -103,23 +106,25 @@ public class PatronController {
 
     @SuppressWarnings({"unchecked"})
     public void hold() {
+        System.out.println(1);
         booksTable.getSelectionModel().getSelectedItems().forEach(item -> {
+            System.out.println(2);
             if (item instanceof Book book) {
-//                DatabaseAccess.addHold(new Hold());
+                System.out.println(3);
+                var realHold = DatabaseAccess.addHold(new Hold(book.isbn(), -1, userID, LocalDate.now()));
+                realHold.ifPresent(hold -> {
+                    System.out.println(4);
+                    holdsTable.getItems().add(hold);
+                });
             }
         });
     }
 
-    @SuppressWarnings("rawtypes")
-    public void delete(ActionEvent actionEvent) {
-        var table = (TableView) ((Node) actionEvent.getTarget()).getUserData();
-        var item = table.getSelectionModel().getSelectedItem();
-        table.getItems().remove(item);
-        switch (item) {
-            case Book book -> DatabaseAccess.removeBook(book.isbn());
-            case DatabaseAccess.User patron -> DatabaseAccess.removePatron(patron.userID());
-            case Loan loan -> DatabaseAccess.removeLoan(loan);
-            default -> {}
+    public void cancelHold() {
+        var item = holdsTable.getSelectionModel().getSelectedItem();
+        holdsTable.getItems().remove(item);
+        if (item instanceof Hold hold) {
+            DatabaseAccess.removeHold(hold.holdID());
         }
     }
 
