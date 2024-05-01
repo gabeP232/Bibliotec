@@ -23,8 +23,10 @@ public class DatabaseAccess {
         // initialize database, creating tables if doesn't exist, open connection, etc...
         if (connection == null) {
             try {
+                //noinspection Java9ReflectionClassVisibility
                 Class.forName("com.mysql.cj.jdbc.Driver");
                 try (var rootConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", System.getenv("DB_PASSWORD"))) {
+                    //noinspection DataFlowIssue
                     new ScriptRunner(rootConnection).runScript(new InputStreamReader(DatabaseAccess.class.getResourceAsStream("bibliotec.sql")));
                 }
                 connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", System.getenv("DB_PASSWORD"));
