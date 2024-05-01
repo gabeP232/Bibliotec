@@ -88,7 +88,7 @@ public class DatabaseAccess {
                 System.out.println("A new Patron was added successfully.");
             }
         } catch (SQLIntegrityConstraintViolationException e ) {
-            throw new RuntimeException("Duplicate User ID",e);
+            throw new RuntimeException("Duplicate User ID", e);
         }  catch (SQLException e ) {
             throw new RuntimeException(e);
         }
@@ -262,7 +262,6 @@ public class DatabaseAccess {
     public static void addLoan(Loan loan) {
         if (!isBookReturned(loan.isbn)) {
             try (var stmt = connection().prepareStatement("INSERT INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (?, ?, ?, ?, ?,?)")) {
-
                 stmt.setInt(1, loan.loanID);
                 stmt.setString(2, loan.isbn);
                 stmt.setString(3, loan.userID);
@@ -279,6 +278,8 @@ public class DatabaseAccess {
             }
         }
     }
+
+
     //find by loan id and set returned to true
     public static void removeLoan(Loan loan) {
         try (var stmt = connection().prepareStatement("DELETE FROM loans WHERE isbn = ?")) {

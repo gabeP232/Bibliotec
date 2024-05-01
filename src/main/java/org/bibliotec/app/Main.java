@@ -3,10 +3,7 @@ package org.bibliotec.app;
 import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
@@ -27,7 +24,7 @@ public class Main extends Application {
         Main.stage = stage;
         stage.setTitle("Bibliotec");
         Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
-        PatronController.show();
+        LoginController.show();
         stage.show();
     }
 

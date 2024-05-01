@@ -30,7 +30,7 @@ public class PatronController {
     private TableView booksTable, loansTable, holdsTable;
     @FXML private ToggleGroup tabs;
 
-    public static void show() {
+    public static void show(String userID) {
         if (scene == null) {
             try {
                 //noinspection DataFlowIssue

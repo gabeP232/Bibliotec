@@ -74,15 +74,19 @@ public class LoginController {
     }
 
     public void login() {
-        if(!registering.get())  {
+        if (registering.get()) {
+            registering.set(false);
+        } else {
             var result = DatabaseAccess.login(username.getText(), password.getText());
             errorMessage.setVisible(result.isEmpty());
-            result.ifPresent(x -> AdminController.show());
+            result.ifPresent(x -> {
+                if (x.isAdmin()) {
+                    AdminController.show();
+                } else {
+                    PatronController.show(x.userID());
+                }
+            });
         }
-        else {
-            registering.set(false);
-        }
-
     }
 
     public void register() {
@@ -102,9 +106,10 @@ public class LoginController {
             }
             errorMessage.setVisible(failed);
             if (!failed) {
-                DatabaseAccess.addPatron(new User(username.getText(), "full name", "email", "address", password.getText(), false));
+                var user = new User(username.getText(), "full name", "email", "address", password.getText(), false)
+                DatabaseAccess.addPatron(user);
                 registering.set(false);
-                AdminController.show();
+                PatronController.show(user.userID());
             }
         } else {
             registering.set(true);
