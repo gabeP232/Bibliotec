@@ -14,7 +14,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import org.bibliotec.app.DatabaseAccess.Book;
 import org.bibliotec.app.DatabaseAccess.Loan;
-import org.bibliotec.app.DatabaseAccess.Patron;
+import org.bibliotec.app.DatabaseAccess.User;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -52,21 +52,21 @@ public class HomeController {
         });
 
         columnsFromRecord(loansTable, Loan.class,
-                Map.of("checkoutID", "Checkout ID", "bookName", "Book", "patronID", "Patron", "returnDate", "Return Date"));
+                Map.of("loanID", "Loan ID", "isbn", "ISBN", "userID", "User ID", "checkoutDate", "Checkout Date", "expectedReturnDate", "Return Date", "returned", "Returned"));
         loansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoans()));
 
-        columnsFromRecord(patronsTable, Patron.class,
-                Map.of("name", "Name", "phoneNum", "Phone Number", "address", "Address", "id", "ID"));
+        columnsFromRecord(patronsTable, User.class,
+                Map.of("userID", "User ID", "fullName", "Name", "email", "Email", "address", "Address", "password", "Password"));
         patronsTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getPatrons()));
 
         columnsFromRecord(patronLoansTable, Loan.class,
-                Map.of("checkoutID", "Checkout ID", "bookName", "Book", "returnDate", "Return Date"));
+                Map.of("loanID", "Loan ID", "isbn", "ISBN", "checkoutDate", "Check Out Date", "expectedReturnDate", "Expected Return Date", "returned", "Is Returned"));
         patronsTable.getSelectionModel().selectedItemProperty().addListener((__, ___, selected) -> {
             if (selected == null) {
                 patronLoansTable.setItems(FXCollections.emptyObservableList());
-            } else if (selected instanceof Patron patron) {
+            } else if (selected instanceof User patron) {
                 System.out.println("Selected: " + selected);
-                patronLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForPatron(patron.id())));
+                patronLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForPatron(patron.userID())));
                 System.out.println(patronLoansTable.getItems());
             }
         });
@@ -77,12 +77,12 @@ public class HomeController {
             if (selected == null) {
                 bookLoansTable.setItems(FXCollections.emptyObservableList());
             } else if (selected instanceof Book book) {
-                bookLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForBook(book.title())));
+                bookLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForBook(book.bookName())));
             }
         });
 
         columnsFromRecord(booksTable, Book.class,
-                Map.of("title", "Title", "author", "Author", "isbn", "ISBN", "genre", "Genre", "publisher", "Publisher", "year", "Year", "pages", "Pages"));
+                Map.of("bookName", "Title", "author", "Author", "isbn", "ISBN", "publisher", "Publisher", "genre", "Genre", "totalCopies", "Total Copies"));
         booksTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getBooks()));
     }
 
@@ -130,7 +130,7 @@ public class HomeController {
         table.getItems().remove(item);
         switch (item) {
             case Book book -> DatabaseAccess.removeBook(book.isbn());
-            case Patron patron -> DatabaseAccess.removePatron(patron.id());
+            case User patron -> DatabaseAccess.removePatron(patron.userID());
             case Loan loan -> DatabaseAccess.removeLoan(loan);
             default -> {}
         }

@@ -11,8 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-
-import java.sql.*;
+import org.bibliotec.app.DatabaseAccess.User;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -68,12 +67,9 @@ public class LoginController {
     }
 
     public void login() {
-        if (DatabaseAccess.login(username.getText(), password.getText())) {
-            errorMessage.setVisible(false);
-            HomeController.show();
-        } else {
-            errorMessage.setVisible(true);
-        }
+        var result = DatabaseAccess.login(username.getText(), password.getText());
+        errorMessage.setVisible(result.isEmpty());
+        result.ifPresent(x -> HomeController.show());
     }
 
     public void register() {
@@ -93,8 +89,7 @@ public class LoginController {
             }
             errorMessage.setVisible(failed);
             if (!failed) {
-                DatabaseAccess.registerUser(username.getText(), password.getText());
-                System.out.println("Registered: " + username.getText() + " with password: " + password.getText());
+                DatabaseAccess.addPatron(new User(username.getText(), "full name", "email", "address", password.getText(), false));
                 registering.set(false);
                 HomeController.show();
             }

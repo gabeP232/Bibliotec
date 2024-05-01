@@ -37,7 +37,7 @@ class DatabaseAccessTest {
 
     @Test
     void addbooks() {
-        DatabaseAccess.Book bk = new DatabaseAccess.Book("test", "author", "isbn", "publisher", 1983);
+        DatabaseAccess.Book bk = new DatabaseAccess.Book("test", "author", "isbn", "publisher", "Romance", 2);
         DatabaseAccess.addBook(bk);
 
     }
@@ -49,12 +49,18 @@ class DatabaseAccessTest {
 
     @Test
     void addPatrons() {
-        DatabaseAccess.Patron pt = new DatabaseAccess.Patron("Jerry", "408345093", "123 SJ St.", 1);
+//        DatabaseAccess.User pt = new DatabaseAccess.User("Jerry47!", "Jerry Richards", "jerry@gmail", "123 SJ St.", "cheese");
     }
 
-    @Test
-    void deletePatrons() {
-        DatabaseAccess.removePatron(1);
-    }
+//    @Test
+//    void deletePatrons() {
+//        DatabaseAccess.removePatron(1);
+//    }
+
+//    @Test
+//    void addHolds() {
+//        DatabaseAccess.Hold hld = new DatabaseAccess.Hold("")
+//        DatabaseAccess.addHold();
+//    }
 }
 
