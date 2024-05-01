@@ -8,16 +8,16 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.controlsfx.control.MasterDetailPane?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="org.bibliotec.app.HomeController"
-      spacing="20" minHeight="500" minWidth="800">
+      spacing="20" minHeight="550" minWidth="1100">
     <padding>
         <Insets bottom="20" left="20" right="20" top="20"/>
     </padding>
 
     <fx:define>
         <ToggleGroup fx:id="tabs"/>
-        <MasterDetailPane>
+        <MasterDetailPane fx:id="booksView" dividerPosition="0.7" VBox.vgrow="ALWAYS">
             <masterNode>
-                <AnchorPane fx:id="booksView" VBox.vgrow="ALWAYS">
+                <AnchorPane>
                     <TableView fx:id="booksTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
                     <ToolBar AnchorPane.bottomAnchor="0">
                         <Button text="Add" onAction="#add" userData="$booksTable"/>
@@ -26,10 +26,10 @@
                 </AnchorPane>
             </masterNode>
             <detailNode>
-                <TableView fx:id="bookLoansTable" editable="true"/>
+                <TableView fx:id="bookLoansTable" minWidth="500" editable="true"/>
             </detailNode>
         </MasterDetailPane>
-        <MasterDetailPane fx:id="patronsView" detailSide="RIGHT" VBox.vgrow="ALWAYS">
+        <MasterDetailPane fx:id="patronsView" detailSide="RIGHT" dividerPosition="0.7" VBox.vgrow="ALWAYS">
             <masterNode>
                 <AnchorPane>
                     <TableView fx:id="patronsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
@@ -40,7 +40,7 @@
                 </AnchorPane>
             </masterNode>
             <detailNode>
-                <TableView fx:id="patronLoansTable" editable="true"/>
+                <TableView fx:id="patronLoansTable" minWidth="500" editable="true"/>
             </detailNode>
         </MasterDetailPane>
         <AnchorPane fx:id="loansView" VBox.vgrow="ALWAYS">

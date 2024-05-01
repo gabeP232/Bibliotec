@@ -25,7 +25,7 @@ public class HomeController {
 
     private static Scene scene;
 
-    @SuppressWarnings("rawtypes") @FXML private TableView booksTable, patronsTable, patronLoansTable, loansTable;
+    @SuppressWarnings("rawtypes") @FXML private TableView booksTable, patronsTable, patronLoansTable, loansTable, bookLoansTable;
     @FXML private ToggleGroup tabs;
 
     public static void show() {
@@ -60,7 +60,7 @@ public class HomeController {
         patronsTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getPatrons()));
 
         columnsFromRecord(patronLoansTable, Loan.class,
-                Map.of("checkoutID", "Checkout ID", "bookName", "Book", "patronID", "Patron", "returnDate", "Return Date"));
+                Map.of("checkoutID", "Checkout ID", "bookName", "Book", "returnDate", "Return Date"));
         patronsTable.getSelectionModel().selectedItemProperty().addListener((__, ___, selected) -> {
             if (selected == null) {
                 patronLoansTable.setItems(FXCollections.emptyObservableList());
@@ -68,6 +68,16 @@ public class HomeController {
                 System.out.println("Selected: " + selected);
                 patronLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForPatron(patron.id())));
                 System.out.println(patronLoansTable.getItems());
+            }
+        });
+
+        columnsFromRecord(bookLoansTable, Loan.class,
+                Map.of("checkoutID", "Checkout ID", "patronID", "Patron", "returnDate", "Return Date"));
+        booksTable.getSelectionModel().selectedItemProperty().addListener((__, ___, selected) -> {
+            if (selected == null) {
+                bookLoansTable.setItems(FXCollections.emptyObservableList());
+            } else if (selected instanceof Book book) {
+                bookLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForBook(book.title())));
             }
         });
 

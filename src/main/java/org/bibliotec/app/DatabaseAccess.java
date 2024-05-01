@@ -156,8 +156,8 @@ public class DatabaseAccess {
             while (stmt.getResultSet().next()) {
                 String checkoutID = stmt.getResultSet().getString(1);
                 String bookName = stmt.getResultSet().getString(2);
-                String patronID = stmt.getResultSet().getString(2);
-                String returnDate = stmt.getResultSet().getString(3);
+                String patronID = stmt.getResultSet().getString(3);
+                String returnDate = stmt.getResultSet().getString(4);
 
                 loans.add(new Loan(checkoutID, bookName, patronID, returnDate));
             }
@@ -176,8 +176,8 @@ public class DatabaseAccess {
             while (stmt.getResultSet().next()) {
                 String checkoutID = stmt.getResultSet().getString(1);
                 String bookName = stmt.getResultSet().getString(2);
-                String patronID = stmt.getResultSet().getString(2);
-                String returnDate = stmt.getResultSet().getString(3);
+                String patronID = stmt.getResultSet().getString(3);
+                String returnDate = stmt.getResultSet().getString(4);
 
                 loans.add(new Loan(checkoutID, bookName, patronID, returnDate));
 //                System.out.println("Checkout ID: " + checkoutID + ", Book: " + title + ", Date: " + date);
@@ -187,6 +187,31 @@ public class DatabaseAccess {
             throw new RuntimeException(e);
         }
         return loans;
+    }
+
+    public static List<Loan> getLoansForBook(String bookName) {
+        List<Loan> loans = new ArrayList<>();
+        try (var stmt = connection().prepareStatement("SELECT * FROM checkout WHERE bookName = ?")) {
+            stmt.setString(1, bookName);
+            stmt.execute();
+            while (stmt.getResultSet().next()) {
+                String checkoutID = stmt.getResultSet().getString(1);
+//                String bookName = stmt.getResultSet().getString(2);
+                String patronID = stmt.getResultSet().getString(3);
+                String returnDate = stmt.getResultSet().getString(4);
+
+                loans.add(new Loan(checkoutID, bookName, patronID, returnDate));
+//                System.out.println("Checkout ID: " + checkoutID + ", Book: " + title + ", Date: " + date);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return loans;
+    }
+
+    public static Patron getPatronForLoan(Loan loan) {
+        return new Patron("John Doe", "123-456-7890", "1234 Elm St", 1);
     }
 
     public static void addBook(Book book) {

@@ -30,8 +30,6 @@ CREATE TABLE IF NOT EXISTS checkout (
     REFERENCES bibliotec.patrons (patronID));
 
 
-
-
 CREATE TABLE IF NOT EXISTS genre (
   type VARCHAR(45) NOT NULL,
   author_fk VARCHAR(45) NOT NULL,
@@ -73,6 +71,11 @@ INSERT IGNORE INTO checkout (checkoutID, bookName, patronID, returnDate) VALUES 
 INSERT IGNORE INTO checkout (checkoutID, bookName, patronID, returnDate) VALUES (4, 'Pride and Prejudice', 4, '2021-12-31');
 INSERT IGNORE INTO checkout (checkoutID, bookName, patronID, returnDate) VALUES (5, 'The Catcher in the Rye', 5, '2021-12-31');
 INSERT IGNORE INTO checkout (checkoutID, bookName, patronID, returnDate) VALUES (6, 'The Hobbit', 6, '2021-12-31');
+INSERT IGNORE INTO checkout (checkoutID, bookName, patronID, returnDate) VALUES (7, 'Farenheit 451', 5, '2021-12-31');
+-- add multiple checkouts for each patron
+INSERT IGNORE INTO checkout (checkoutID, bookName, patronID, returnDate) VALUES (8, 'The Lord of the Rings', 1, '2021-12-31');
+INSERT IGNORE INTO checkout (checkoutID, bookName, patronID, returnDate) VALUES (9, 'The Lord of the Rings', 2, '2021-12-31');
+
 
 INSERT IGNORE INTO genre (type, author_fk, subtype) VALUES ('Fiction', '9780743273565', 'Classic');
 INSERT IGNORE INTO genre (type, author_fk, subtype) VALUES ('Fiction', '9780061120084', 'Classic');
