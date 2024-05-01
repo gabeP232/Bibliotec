@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS users(
 );
 
 CREATE TABLE IF NOT EXISTS loans(
-    loanID             INT         NOT NULL,
+    loanID             INT         NOT NULL AUTO_INCREMENT,
     isbn               VARCHAR(50) NOT NULL,
     userID             VARCHAR(45) NOT NULL,
     checkoutDate       DATE        NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS loans(
 
 CREATE TABLE IF NOT EXISTS holds(
     isbn   VARCHAR(45) NOT NULL,
-    holdID INT         NOT NULL,
+    holdID INT         NOT NULL AUTO_INCREMENT,
     userID VARCHAR(45) NOT NULL,
     holdDate DATE      NOT NULL,
     PRIMARY KEY (holdID),
@@ -73,12 +73,13 @@ INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('J
 INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Jane Doe', 'jane@doe.com', '123 First St', 'janedoe', 'password');
 INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Bob Smith', 'bob@smith.com', '123 Second St', 'bobsmith', 'password');
 INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('James Stewart', 'james@stewart.com', '123 Third St', 'jstewart', 'password');
+INSERT IGNORE INTO users (fullName, email, address, userID, password, isAdmin) VALUES ('admin man', 'admin@admin.com', 'admin st', 'admin', 'password', TRUE);
 
-INSERT IGNORE INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (1, '978-0439708180', 'johndoe', '2021-01-01', '2021-01-15', FALSE);
-INSERT IGNORE INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (2, '978-0345534835', 'janedoe', '2021-01-01', '2021-01-15', FALSE);
-INSERT IGNORE INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (3, '978-0439023481', 'bobsmith', '2021-01-01', '2021-01-15', FALSE);
-INSERT IGNORE INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (4, '978-0062024039', 'jstewart', '2021-01-01', '2021-01-15', FALSE);
-INSERT IGNORE INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (5, '978-0307474278', 'johndoe', '2021-01-01', '2021-01-15', TRUE);
+INSERT IGNORE INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES ('978-0439708180', 'johndoe', '2021-01-01', '2021-01-15', FALSE);
+INSERT IGNORE INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES ('978-0345534835', 'janedoe', '2021-01-01', '2021-01-15', FALSE);
+INSERT IGNORE INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES ('978-0439023481', 'bobsmith', '2021-01-01', '2021-01-15', FALSE);
+INSERT IGNORE INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES ('978-0062024039', 'jstewart', '2021-01-01', '2021-01-15', FALSE);
+INSERT IGNORE INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES ('978-0307474278', 'johndoe', '2021-01-01', '2021-01-15', TRUE);
 
-INSERT IGNORE INTO holds (isbn, holdID, userID, holdDate) VALUES ('978-0877792956', 1, 'johndoe', '2024-04-01');
-INSERT IGNORE INTO holds (isbn, holdID, userID, holdDate) VALUES ('978-1451648539', 2, 'janedoe', '2024-04-16');
+INSERT IGNORE INTO holds (isbn, userID, holdDate) VALUES ('978-0877792956', 'johndoe', '2024-04-01');
+INSERT IGNORE INTO holds (isbn, userID, holdDate) VALUES ('978-1451648539', 'janedoe', '2024-04-16');

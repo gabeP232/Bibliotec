@@ -106,7 +106,7 @@ public class LoginController {
             }
             errorMessage.setVisible(failed);
             if (!failed) {
-                var user = new User(username.getText(), "full name", "email", "address", password.getText(), false)
+                var user = new User(username.getText(), fullName.getText(), email.getText(), address.getText(), password.getText(), false);
                 DatabaseAccess.addPatron(user);
                 registering.set(false);
                 PatronController.show(user.userID());
