@@ -24,7 +24,7 @@ public class DatabaseAccess {
         if (connection == null) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                try (var rootConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", null)) {
+                try (var rootConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "An15no35gabe!")) {
                     new ScriptRunner(rootConnection).runScript(new InputStreamReader(DatabaseAccess.class.getResourceAsStream("bibliotec.sql")));
                 }
                 connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", null);
