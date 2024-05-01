@@ -65,11 +65,3 @@ jlink {
     }
 }
 
-configurations.forEach { config ->
-    if (config.name.contains("downloadSources")) {
-        def runtimeAttributes = configurations.runtimeClasspath.attributes
-        runtimeAttributes.keySet().each { key ->
-            config.attributes.attribute(key, runtimeAttributes.getAttribute(key))
-        }
-    }
-}

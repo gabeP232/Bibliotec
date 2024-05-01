@@ -1,6 +1,8 @@
 package org.bibliotec.app;
 
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -10,8 +12,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 import org.bibliotec.app.DatabaseAccess.Book;
 import org.bibliotec.app.DatabaseAccess.Loan;
 import org.bibliotec.app.DatabaseAccess.User;
@@ -25,7 +29,8 @@ public class HomeController {
 
     private static Scene scene;
 
-    @SuppressWarnings("rawtypes") @FXML private TableView booksTable, patronsTable, patronLoansTable, loansTable, bookLoansTable;
+    @SuppressWarnings("rawtypes") @FXML
+    private TableView booksTable, patronsTable, patronLoansTable, loansTable, bookLoansTable;
     @FXML private ToggleGroup tabs;
 
     public static void show() {
@@ -60,7 +65,7 @@ public class HomeController {
         patronsTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getPatrons()));
 
         columnsFromRecord(patronLoansTable, Loan.class,
-                Map.of("loanID", "Loan ID", "isbn", "ISBN", "checkoutDate", "Checkout Date", "expectedReturnDate", "Expected Return Date", "returned", "Is Returned"));
+                Map.of("loanID", "Loan ID", "isbn", "ISBN", "checkoutDate", "Checkout Date", "expectedReturnDate", "Expected Return Date", "returned", "Returned"));
         patronsTable.getSelectionModel().selectedItemProperty().addListener((__, ___, selected) -> {
             if (selected == null) {
                 patronLoansTable.setItems(FXCollections.emptyObservableList());
@@ -81,6 +86,8 @@ public class HomeController {
             }
         });
 
+        Book x = new Book("a", "b", "c", "d", "e", 1);
+
         columnsFromRecord(booksTable, Book.class,
                 Map.of("bookName", "Title", "author", "Author", "isbn", "ISBN", "publisher", "Publisher", "genre", "Genre", "totalCopies", "Total Copies"));
         booksTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getBooks()));
@@ -88,28 +95,41 @@ public class HomeController {
 
     private static final Object placeholder = new Object();
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static <R extends Record> void columnsFromRecord(TableView<R> table, Class<R> record, Map<String, String> columnNames) {
         for (var component : record.getRecordComponents()) {
             if (!columnNames.containsKey(component.getName())) continue;
+            final boolean typeIsBoolean = component.getType().equals(boolean.class) || component.getType().equals(Boolean.class);
 
-            var column = new TableColumn<R, String>(columnNames.get(component.getName()));
+            var column = new TableColumn<R, Object>(columnNames.get(component.getName()));
             column.setCellValueFactory(cellData -> {
                 try {
                     if (cellData.getValue() == null || cellData.getValue() == placeholder) {
-                        return new ReadOnlyStringWrapper("<edit>");
+                        if (typeIsBoolean) {
+                            return (ObservableValue) new ReadOnlyBooleanWrapper(false);
+                        } else {
+                            return (ObservableValue) new ReadOnlyStringWrapper("<edit>");
+                        }
                     }
-                    return new ReadOnlyStringWrapper(String.valueOf(component.getAccessor().invoke(cellData.getValue())));
+                    if (typeIsBoolean) {
+                        return (ObservableValue) new ReadOnlyBooleanWrapper((Boolean) component.getAccessor().invoke(cellData.getValue()));
+                    } else {
+                        return (ObservableValue) new ReadOnlyStringWrapper(String.valueOf(component.getAccessor().invoke(cellData.getValue())));
+                    }
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
             });
             column.setOnEditCommit(event -> {
-                String newValue = event.getNewValue();
+//                String newValue = event.getNewValue();
 //                R recordInstance = event.getRowValue();
                 // save the data
             });
-            column.setCellFactory(TextFieldTableCell.forTableColumn());
-//            TextFieldTableCell.forTableColumn(StringConverter.)
+            if (typeIsBoolean) {
+                column.setCellFactory(CheckBoxTableCell.forTableColumn((TableColumn) column));
+            } else {
+                column.setCellFactory((Callback) TextFieldTableCell.forTableColumn());
+            }
             table.getColumns().add(column);
         }
     }
