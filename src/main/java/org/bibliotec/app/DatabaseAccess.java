@@ -24,10 +24,10 @@ public class DatabaseAccess {
         if (connection == null) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                try (var rootConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "An15no35gabe!")) {
+                try (var rootConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", System.getenv("DB_PASSWORD"))) {
                     new ScriptRunner(rootConnection).runScript(new InputStreamReader(DatabaseAccess.class.getResourceAsStream("bibliotec.sql")));
                 }
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", null);
+                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bibliotec", "root", System.getenv("DB_PASSWORD"));
             } catch (ClassNotFoundException | SQLException e) {
                 throw new RuntimeException(e);
             }
