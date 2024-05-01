@@ -4,7 +4,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import org.controlsfx.control.MasterDetailPane?>
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="org.bibliotec.app.PatronController"
       spacing="20" minHeight="550" minWidth="1100">
     <padding>
@@ -13,20 +12,24 @@
 
     <fx:define>
         <ToggleGroup fx:id="tabs"/>
-        <MasterDetailPane fx:id="booksView" dividerPosition="0.7" VBox.vgrow="ALWAYS">
-            <masterNode>
-                <AnchorPane>
-                    <TableView fx:id="booksTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                               AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-                    <ToolBar AnchorPane.bottomAnchor="0">
-                        <Button text="Hold" onAction="#hold" userData="$booksTable"/>
-                    </ToolBar>
-                </AnchorPane>
-            </masterNode>
-            <detailNode>
-                <TableView fx:id="bookLoansTable" minWidth="500" editable="true"/>
-            </detailNode>
-        </MasterDetailPane>
+        <AnchorPane fx:id="booksView">
+            <TableView fx:id="booksTable" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                       AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+            <ToolBar AnchorPane.bottomAnchor="0">
+                <Button text="Hold" onAction="#hold" userData="$booksTable"/>
+            </ToolBar>
+        </AnchorPane>
+        <AnchorPane fx:id="loansView" VBox.vgrow="ALWAYS">
+            <TableView fx:id="loansTable" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                       AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+        </AnchorPane>
+        <AnchorPane fx:id="holdsView" VBox.vgrow="ALWAYS">
+            <TableView fx:id="holdsTable" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                       AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+            <ToolBar AnchorPane.bottomAnchor="0">
+                <Button text="Delete" onAction="#delete" userData="$holdsTable"/>
+            </ToolBar>
+        </AnchorPane>
         <VBox fx:id="profileView" alignment="CENTER">
             <GridPane alignment="CENTER" vgap="40.0">
                 <columnConstraints>
@@ -47,7 +50,7 @@
                 </VBox.margin>
                 <Label text="Full Name" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="0"
                        GridPane.valignment="CENTER"/>
-                <TextField GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
                 <Label text="Password" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="1"
                        GridPane.valignment="CENTER"/>
                 <PasswordField GridPane.columnIndex="1" GridPane.rowIndex="1"/>
@@ -62,25 +65,14 @@
                 </VBox.margin>
             </Button>
         </VBox>
-        <AnchorPane fx:id="holdsView" VBox.vgrow="ALWAYS">
-            <TableView fx:id="holdsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                       AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-            <ToolBar AnchorPane.bottomAnchor="0">
-                <Button text="Delete" onAction="#delete" userData="$holdsTable"/>
-            </ToolBar>
-        </AnchorPane>
-        <AnchorPane fx:id="loansView" VBox.vgrow="ALWAYS">
-            <TableView fx:id="loansTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                       AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-        </AnchorPane>
     </fx:define>
 
     <HBox alignment="CENTER" spacing="10">
         <InputGroup>
             <ToggleButton text="Books" toggleGroup="$tabs" userData="$booksView" selected="true"/>
-            <ToggleButton text="My Profile" toggleGroup="$tabs" userData="$profileView"/>
-            <ToggleButton text="Holds" toggleGroup="$tabs" userData="$holdsView"/>
             <ToggleButton text="Loans" toggleGroup="$tabs" userData="$loansView"/>
+            <ToggleButton text="Holds" toggleGroup="$tabs" userData="$holdsView"/>
+            <ToggleButton text="My Profile" toggleGroup="$tabs" userData="$profileView"/>
         </InputGroup>
         <Button text="Logout" onAction="#logout"/>
     </HBox>

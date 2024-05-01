@@ -26,7 +26,7 @@ import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-public class HomeController {
+public class AdminController {
 
     private static Scene scene;
 
@@ -38,7 +38,7 @@ public class HomeController {
         if (scene == null) {
             try {
                 //noinspection DataFlowIssue
-                scene = new Scene(FXMLLoader.load(HomeController.class.getResource("admin.fxml")));
+                scene = new Scene(FXMLLoader.load(AdminController.class.getResource("admin.fxml")));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -137,10 +137,6 @@ public class HomeController {
         }
     }
 
-    public void logout() {
-        LoginController.show();
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void add(ActionEvent actionEvent) {
         ((TableView) ((Node) actionEvent.getTarget()).getUserData()).getItems().add(placeholder);
@@ -157,5 +153,9 @@ public class HomeController {
             case Loan loan -> DatabaseAccess.removeLoan(loan);
             default -> {}
         }
+    }
+
+    public void logout() {
+        LoginController.show();
     }
 }

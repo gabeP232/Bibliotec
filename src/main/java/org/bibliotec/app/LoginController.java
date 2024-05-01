@@ -69,7 +69,7 @@ public class LoginController {
     public void login() {
         var result = DatabaseAccess.login(username.getText(), password.getText());
         errorMessage.setVisible(result.isEmpty());
-        result.ifPresent(x -> HomeController.show());
+        result.ifPresent(x -> AdminController.show());
     }
 
     public void register() {
@@ -91,7 +91,7 @@ public class LoginController {
             if (!failed) {
                 DatabaseAccess.addPatron(new User(username.getText(), "full name", "email", "address", password.getText(), false));
                 registering.set(false);
-                HomeController.show();
+                AdminController.show();
             }
         } else {
             registering.set(true);
