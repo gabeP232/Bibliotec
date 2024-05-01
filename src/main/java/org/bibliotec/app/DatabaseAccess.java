@@ -15,7 +15,7 @@ public class DatabaseAccess {
     public record Book(String bookName, String author, String isbn, String publisher, String genre, int totalCopies) {}
     public record User(String userID, String fullName, String email, String address, String password, boolean isAdmin) {}
     public record Loan(int loanID, String isbn, String userID, LocalDate checkoutDate, LocalDate expectedReturnDate, boolean returned) {}
-    public record Hold(String isbn, int holdID, String userId) {}
+    public record Hold(String isbn, int holdID, String userID, LocalDate holdDate) {}
 
     private static Connection connection;
 
@@ -119,6 +119,19 @@ public class DatabaseAccess {
         }
         return users;
 
+    }
+
+    public static List<Hold> getHolds() {
+        var holds = new ArrayList<Hold>();
+        try (var stmt = connection().prepareStatement("SELECT * FROM holds")) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                holds.add(new Hold(rs.getString(1), rs.getInt(2), rs.getString(3), rs.getDate(4).toLocalDate()));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return holds;
     }
 
     public static List<Loan> getLoans() {
@@ -228,12 +241,11 @@ public class DatabaseAccess {
 
     public static void addHold(Hold hold) {
         if (!isBookReturned(hold.isbn)) {
-            try (var stmt = connection().prepareStatement("INSERT INTO holds (isbn, holdID, userID) VALUES (?, ?, ?)")) {
-
-                // Set parameters
+            try (var stmt = connection().prepareStatement("INSERT INTO holds (isbn, holdID, userID, holdDate) VALUES (?, ?, ?, ?)")) {
                 stmt.setString(1, hold.isbn);
                 stmt.setInt(2, hold.holdID);
-                stmt.setString(3, hold.userId);
+                stmt.setString(3, hold.userID);
+                stmt.setDate(4, Date.valueOf(hold.holdDate));
 
                 int rowsInserted = stmt.executeUpdate();
                 if (rowsInserted > 0) {

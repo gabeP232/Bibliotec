@@ -43,6 +43,13 @@
                 <TableView fx:id="patronLoansTable" minWidth="500" editable="true"/>
             </detailNode>
         </MasterDetailPane>
+        <AnchorPane fx:id="holdsView" VBox.vgrow="ALWAYS">
+            <TableView fx:id="holdsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+            <ToolBar AnchorPane.bottomAnchor="0">
+                <Button text="Add" onAction="#add" userData="$holdsTable"/>
+                <Button text="Delete" onAction="#delete" userData="$holdsTable"/>
+            </ToolBar>
+        </AnchorPane>
         <AnchorPane fx:id="loansView" VBox.vgrow="ALWAYS">
             <TableView fx:id="loansTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
             <ToolBar AnchorPane.bottomAnchor="0">
@@ -56,6 +63,7 @@
         <InputGroup>
             <ToggleButton text="Books" toggleGroup="$tabs" userData="$booksView" selected="true"/>
             <ToggleButton text="Patrons" toggleGroup="$tabs" userData="$patronsView"/>
+            <ToggleButton text="Holds" toggleGroup="$tabs" userData="$holdsView"/>
             <ToggleButton text="Loans" toggleGroup="$tabs" userData="$loansView"/>
         </InputGroup>
         <Button text="Logout" onAction="#logout"/>

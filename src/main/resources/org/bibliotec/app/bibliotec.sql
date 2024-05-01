@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS holds(
     isbn   VARCHAR(45) NOT NULL,
     holdID INT         NOT NULL,
     userID VARCHAR(45) NOT NULL,
+    holdDate DATE      NOT NULL,
     PRIMARY KEY (holdID),
     FOREIGN KEY (userID) REFERENCES users (userID),
     FOREIGN KEY (isbn) REFERENCES books (isbn)
@@ -78,3 +79,6 @@ INSERT IGNORE INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate
 INSERT IGNORE INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (3, '978-0439023481', 'bobsmith', '2021-01-01', '2021-01-15', FALSE);
 INSERT IGNORE INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (4, '978-0062024039', 'jstewart', '2021-01-01', '2021-01-15', FALSE);
 INSERT IGNORE INTO loans (loanID, isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (5, '978-0307474278', 'johndoe', '2021-01-01', '2021-01-15', FALSE);
+
+INSERT IGNORE INTO holds (isbn, holdID, userID, holdDate) VALUES ('978-0877792956', 1, 'johndoe', '2024-04-01');
+INSERT IGNORE INTO holds (isbn, holdID, userID, holdDate) VALUES ('978-1451648539', 2, 'janedoe', '2024-04-16');

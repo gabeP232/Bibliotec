@@ -17,6 +17,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import org.bibliotec.app.DatabaseAccess.Book;
+import org.bibliotec.app.DatabaseAccess.Hold;
 import org.bibliotec.app.DatabaseAccess.Loan;
 import org.bibliotec.app.DatabaseAccess.User;
 
@@ -30,7 +31,7 @@ public class HomeController {
     private static Scene scene;
 
     @SuppressWarnings("rawtypes") @FXML
-    private TableView booksTable, patronsTable, patronLoansTable, loansTable, bookLoansTable;
+    private TableView booksTable, patronsTable, patronLoansTable, loansTable, bookLoansTable, holdsTable;
     @FXML private ToggleGroup tabs;
 
     public static void show() {
@@ -60,6 +61,10 @@ public class HomeController {
                 Map.of("loanID", "Loan ID", "isbn", "ISBN", "userID", "User ID", "checkoutDate", "Checkout Date", "expectedReturnDate", "Return Date", "returned", "Returned"));
         loansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoans()));
 
+        columnsFromRecord(holdsTable, Hold.class,
+                Map.of("holdID", "Hold ID", "isbn", "ISBN", "userID", "User ID", "holdDate", "Hold Date"));
+        holdsTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getHolds()));
+
         columnsFromRecord(patronsTable, User.class,
                 Map.of("userID", "User ID", "fullName", "Name", "email", "Email", "address", "Address"));
         patronsTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getPatrons()));
@@ -85,8 +90,6 @@ public class HomeController {
                 bookLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForBook(book.isbn())));
             }
         });
-
-        Book x = new Book("a", "b", "c", "d", "e", 1);
 
         columnsFromRecord(booksTable, Book.class,
                 Map.of("bookName", "Title", "author", "Author", "isbn", "ISBN", "publisher", "Publisher", "genre", "Genre", "totalCopies", "Total Copies"));
