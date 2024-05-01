@@ -38,7 +38,7 @@ public class HomeController {
         if (scene == null) {
             try {
                 //noinspection DataFlowIssue
-                scene = new Scene(FXMLLoader.load(HomeController.class.getResource("home.fxml")));
+                scene = new Scene(FXMLLoader.load(HomeController.class.getResource("admin.fxml")));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
