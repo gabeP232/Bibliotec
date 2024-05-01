@@ -63,6 +63,18 @@ public class DatabaseAccess {
         }
         return books;
     }
+    
+    public static Optional<User> getPatron(String userID) {
+        try (var stmt = connection().prepareStatement("SELECT * FROM users WHERE userID = ?")) {
+            stmt.setString(1, userID);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() ?
+                    Optional.of(new User(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getBoolean(6)))
+                    : Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static List<User> getPatrons() {
         var patrons = new ArrayList<User>();
@@ -239,12 +251,12 @@ public class DatabaseAccess {
         }
     }
 
-    public static boolean isBookReturned(String isbn) {
+    public static boolean isBookAvailable(String isbn) {
         return getAvailableCopies(isbn) > 0;
     }
 
     public static Hold addHold(Hold hold) {
-        if (!isBookReturned(hold.isbn)) {
+        if (!isBookAvailable(hold.isbn)) {
             try (var stmt = connection().prepareStatement("INSERT INTO holds (isbn, userID, holdDate) VALUES (?, ?, ?)")) {
                 stmt.setString(1, hold.isbn);
                 stmt.setString(2, hold.userID);
@@ -257,7 +269,9 @@ public class DatabaseAccess {
                         st.setString(1, hold.isbn);
                         st.setString(2, hold.userID);
                         st.setDate(3, Date.valueOf(hold.holdDate));
-                        return hold;
+
+                        ResultSet rs = st.executeQuery();
+                        return rs.next() ? new Hold(hold.isbn, rs.getInt(1), hold.userID, hold.holdDate) : null;
                     }
                 }
             } catch (SQLException e) {
@@ -268,7 +282,7 @@ public class DatabaseAccess {
     }
 
     public static Loan addLoan(Loan loan) {
-        if (!isBookReturned(loan.isbn)) {
+        if (isBookAvailable(loan.isbn)) {
             try (var stmt = connection().prepareStatement("INSERT INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (?, ?, ?, ?,?)")) {
                 stmt.setString(1, loan.isbn);
                 stmt.setString(2, loan.userID);
@@ -278,13 +292,14 @@ public class DatabaseAccess {
 
                 int rowsInserted = stmt.executeUpdate();
                 if (rowsInserted > 0) {
-                    System.out.println("A new loan was added successfully.");
-                    try (var st = connection().prepareStatement("SELECT loanID FROM Loans WHERE isbn = ? AND userID = ? AND returned = ?")) {
+                    try (var st = connection().prepareStatement("SELECT loanID FROM Loans WHERE isbn = ? AND userID = ? AND checkoutDate = ? AND returned = ?")) {
                         st.setString(1, loan.isbn);
                         st.setString(2, loan.userID);
-                        st.setBoolean(3, loan.returned);
-                        Loan loan2 = new Loan(loan.loanID, loan.isbn, loan.userID, loan.checkoutDate, loan.expectedReturnDate, loan.returned);
-                        return loan2;
+                        st.setDate(3, Date.valueOf(loan.checkoutDate));
+                        st.setBoolean(4, loan.returned);
+
+                        ResultSet rs = st.executeQuery();
+                        return rs.next() ? new Loan(rs.getInt(0), loan.isbn, loan.userID, loan.checkoutDate, loan.expectedReturnDate, loan.returned) : null;
                     }
                 }
             } catch (SQLException e) {

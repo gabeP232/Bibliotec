@@ -48,14 +48,14 @@
                 </padding>
                 <Label text="Full Name" GridPane.halignment="CENTER" GridPane.rowIndex="0"/>
                 <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                <Label text="Password" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
-                <PasswordField GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                <Label text="Confirm Password" GridPane.halignment="CENTER" GridPane.rowIndex="2"/>
-                <PasswordField GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                <Label text="E-mail" GridPane.halignment="CENTER" GridPane.rowIndex="3"/>
-                <TextField GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                <Label text="Address" GridPane.halignment="CENTER" GridPane.rowIndex="4"/>
-                <TextField GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                <Label text="E-mail" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
+                <TextField fx:id="emailField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="Address" GridPane.halignment="CENTER" GridPane.rowIndex="2"/>
+                <TextField fx:id="addressField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Label text="Password" GridPane.halignment="CENTER" GridPane.rowIndex="3"/>
+                <PasswordField GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <Label text="Confirm Password" GridPane.halignment="CENTER" GridPane.rowIndex="4"/>
+                <PasswordField GridPane.columnIndex="1" GridPane.rowIndex="4"/>
             </GridPane>
             <Button minWidth="75.0" mnemonicParsing="false" text="Save">
                 <VBox.margin>

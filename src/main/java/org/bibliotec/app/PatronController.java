@@ -11,6 +11,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.layout.VBox;
@@ -25,12 +26,15 @@ import java.util.Map;
 
 public class PatronController {
     private static Scene scene;
+    private static String userID;
 
     @SuppressWarnings("rawtypes") @FXML
     private TableView booksTable, loansTable, holdsTable;
+    @FXML private TextField nameField, emailField, addressField;
     @FXML private ToggleGroup tabs;
 
     public static void show(String userID) {
+        PatronController.userID = userID;
         if (scene == null) {
             try {
                 //noinspection DataFlowIssue
@@ -53,12 +57,18 @@ public class PatronController {
             }
         });
 
+        DatabaseAccess.getPatron(userID).ifPresent(patron -> {
+            nameField.setText(patron.fullName());
+            emailField.setText(patron.email());
+            addressField.setText(patron.address());
+        });
+
         columnsFromRecord(loansTable, Loan.class,
-                Map.of("loanID", "Loan ID", "isbn", "ISBN", "userID", "User ID", "checkoutDate", "Checkout Date", "expectedReturnDate", "Return Date", "returned", "Returned"));
+                Map.of("loanID", "Loan ID", "isbn", "ISBN", "checkoutDate", "Checkout Date", "expectedReturnDate", "Return Date", "returned", "Returned"));
         loansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoans()));
 
         columnsFromRecord(holdsTable, Hold.class,
-                Map.of("holdID", "Hold ID", "isbn", "ISBN", "userID", "User ID", "holdDate", "Hold Date"));
+                Map.of("holdID", "Hold ID", "isbn", "ISBN", "holdDate", "Hold Date"));
         holdsTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getHolds()));
 
         columnsFromRecord(booksTable, Book.class,
@@ -114,6 +124,7 @@ public class PatronController {
     }
 
     public void logout() {
+        userID = null;
         LoginController.show();
     }
 }
