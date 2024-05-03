@@ -38,13 +38,15 @@ public class DatabaseAccess {
     }
 
     public static Optional<User> login(String username, String password) {
-        // return true if success, false otherwise
-        try (var stmt = connection().prepareStatement("SELECT * FROM users where userID = ? and password = ? ")) {
+        try (var stmt = connection().prepareStatement("SELECT * FROM users where userID = ?")) {
             stmt.setString(1, username);
-            stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
-            return rs.next() ? Optional.of(new User(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getBoolean(6)))
-                    : Optional.empty();
+            if (rs.next() && org.mindrot.jbcrypt.BCrypt.checkpw(password, rs.getString("password"))) {
+                return Optional.of(new User(rs.getString("userID"), rs.getString("fullName"), rs.getString("email"), rs.getString("address"), rs.getString("password"), rs.getBoolean("isAdmin")));
+            }
+            else {
+                return Optional.empty();
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -91,15 +93,22 @@ public class DatabaseAccess {
 
     public static void addPatron(User patron) {
         try (var stmt = connection().prepareStatement("INSERT INTO users (userID, fullName, email, address, password) VALUES (?, ?, ?, ?, ?)")) {
+            String hashed = org.mindrot.jbcrypt.BCrypt.hashpw(patron.password, org.mindrot.jbcrypt.BCrypt.gensalt(10));
             stmt.setString(1, patron.userID);
             stmt.setString(2, patron.fullName);
             stmt.setString(3, patron.email);
             stmt.setString(4, patron.address);
-            stmt.setString(5, patron.password);
+            stmt.setString(5, hashed);
 
             int rowsInserted = stmt.executeUpdate();
             if (rowsInserted > 0) {
                 System.out.println("A new Patron was added successfully.");
+            }
+            if (org.mindrot.jbcrypt.BCrypt.checkpw(patron.password, hashed)) {
+                System.out.println("Passwords match hash");
+            }
+            else {
+                System.out.println("Passwords do not match");
             }
         } catch (SQLIntegrityConstraintViolationException e ) {
             throw new RuntimeException("Duplicate User ID", e);

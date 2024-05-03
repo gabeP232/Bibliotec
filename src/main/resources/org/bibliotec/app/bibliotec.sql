@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users(
     fullName VARCHAR(45) NOT NULL,
     email    VARCHAR(45) NOT NULL,
     address  VARCHAR(45) NOT NULL,
-    password VARCHAR(45) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     isAdmin  BOOLEAN     NOT NULL DEFAULT FALSE,
     PRIMARY KEY (userID)
 );
@@ -69,11 +69,11 @@ INSERT IGNORE INTO books (bookName, author, isbn, publisher, genre) VALUES ('Eng
 INSERT IGNORE INTO books (bookName, author, isbn, publisher, genre) VALUES ('Steve Jobs', 'Walter Isaacson', '978-1451648539', 'Simon & Schuster', 'Biography');
 INSERT IGNORE INTO books (bookName, author, isbn, publisher, genre) VALUES ('The 7 Habits of Highly Effective People', 'Stephen R. Covey', '978-1982137274', 'Simon & Schuster', 'Self-Help');
 
-INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('John Doe', 'john@doe.com', '123 Main St', 'johndoe', 'password');
-INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Jane Doe', 'jane@doe.com', '123 First St', 'janedoe', 'password');
-INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Bob Smith', 'bob@smith.com', '123 Second St', 'bobsmith', 'password');
-INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('James Stewart', 'james@stewart.com', '123 Third St', 'jstewart', 'password');
-INSERT IGNORE INTO users (fullName, email, address, userID, password, isAdmin) VALUES ('admin man', 'admin@admin.com', 'admin st', 'admin', 'password', TRUE);
+INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('John Doe', 'john@doe.com', '123 Main St', 'johndoe', '$2a$10$kx4oZ6H9Ly4LyBBqYS33bOaANys1oCmnHDaaz8ymoDCPHTUSGzgKO');
+INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Jane Doe', 'jane@doe.com', '123 First St', 'janedoe', '$2a$10$kx4oZ6H9Ly4LyBBqYS33bOaANys1oCmnHDaaz8ymoDCPHTUSGzgKO');
+INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Bob Smith', 'bob@smith.com', '123 Second St', 'bobsmith', '$2a$10$kx4oZ6H9Ly4LyBBqYS33bOaANys1oCmnHDaaz8ymoDCPHTUSGzgKO');
+INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('James Stewart', 'james@stewart.com', '123 Third St', 'jstewart', '$2a$10$kx4oZ6H9Ly4LyBBqYS33bOaANys1oCmnHDaaz8ymoDCPHTUSGzgKO');
+INSERT IGNORE INTO users (fullName, email, address, userID, password, isAdmin) VALUES ('admin man', 'admin@admin.com', 'admin st', 'admin', '$2a$10$kx4oZ6H9Ly4LyBBqYS33bOaANys1oCmnHDaaz8ymoDCPHTUSGzgKO', TRUE);
 
 INSERT IGNORE INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES ('978-0439708180', 'johndoe', '2021-01-01', '2021-01-15', FALSE);
 INSERT IGNORE INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES ('978-0345534835', 'janedoe', '2021-01-01', '2021-01-15', FALSE);
