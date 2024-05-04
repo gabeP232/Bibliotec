@@ -33,7 +33,6 @@
                     <TableView fx:id="patronsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
                                AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
                     <ToolBar AnchorPane.bottomAnchor="0">
-                        <Button text="Add" onAction="#add" userData="$patronsTable"/>
                         <Button text="Delete" onAction="#delete" userData="$patronsTable"/>
                     </ToolBar>
                 </AnchorPane>

@@ -31,12 +31,14 @@ public class DatabaseAccess {
         return connection;
     }
 
-    interface Updatable {
+    interface Updatable<PK> {
         void updateDB();
+        PK primaryKey();
+        void updatePrimaryKey(PK oldKey);
     }
 
     public record Genre(String name, String category) {}
-    public record Book(String bookName, String author, String isbn, String publisher, String genre, int totalCopies) implements Updatable {
+    public record Book(String bookName, String author, String isbn, String publisher, String genre, int totalCopies) implements Updatable<String> {
         public void updateDB() {
             try (var stmt = connection().prepareStatement("UPDATE books SET bookName = ?, author = ?, publisher = ?, genre = ?, totalCopies = ? WHERE isbn = ?")) {
                 stmt.setString(1, bookName);
@@ -57,11 +59,32 @@ public class DatabaseAccess {
             }
         }
 
+        @Override
+        public String primaryKey() {
+            return isbn;
+        }
+
+        public void updatePrimaryKey(String oldKey) {
+            try (var stmt = connection().prepareStatement("UPDATE books SET isbn = ? WHERE isbn = ?")) {
+                stmt.setString(1, isbn);
+                stmt.setString(2, oldKey);
+
+                int rowsUpdated = stmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("Book with ISBN " + oldKey + " was updated successfully.");
+                } else {
+                    throw new RuntimeException("No book with ISBN " + oldKey + " was found.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         public static Book empty() {
             return new Book("<edit>", "<edit>", Utils.makeISBN(), "<edit>", "Reference", 0);
         }
     }
-    public record User(String userID, String fullName, String email, String address, String password, boolean isAdmin) implements Updatable {
+    public record User(String userID, String fullName, String email, String address, String password, boolean isAdmin) implements Updatable<String> {
         public void updateDB() {
             try (var stmt = connection().prepareStatement("UPDATE users SET fullName = ?, email = ?, address = ?, password = ? WHERE userID = ?")) {
                 stmt.setString(1, fullName);
@@ -81,11 +104,31 @@ public class DatabaseAccess {
             }
         }
 
+        public String primaryKey() {
+            return userID;
+        }
+
+        public void updatePrimaryKey(String oldKey) {
+            try (var stmt = connection().prepareStatement("UPDATE users SET userID = ? WHERE userID = ?")) {
+                stmt.setString(1, userID);
+                stmt.setString(2, oldKey);
+
+                int rowsUpdated = stmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("User with ID " + oldKey + " was updated successfully.");
+                } else {
+                    throw new RuntimeException("No user with ID " + oldKey + " was found.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         public static User empty() {
             return new User("<edit>", "<edit>", "<edit>", "<edit>", "<edit>", false);
         }
     }
-    public record Loan(int loanID, String isbn, String userID, Date checkoutDate, Date expectedReturnDate, boolean returned) implements Updatable {
+    public record Loan(int loanID, String isbn, String userID, Date checkoutDate, Date expectedReturnDate, boolean returned) implements Updatable<Integer> {
         public void updateDB() {
             try (var stmt = connection().prepareStatement("UPDATE loans SET isbn = ?, userID = ?, checkoutDate = ?, expectedReturnDate = ?, returned = ? WHERE loanID = ?")) {
                 stmt.setString(1, isbn);
@@ -106,11 +149,31 @@ public class DatabaseAccess {
             }
         }
 
+        public Integer primaryKey() {
+            return loanID;
+        }
+
+        public void updatePrimaryKey(Integer oldKey) {
+            try (var stmt = connection().prepareStatement("UPDATE loans SET loanID = ? WHERE loanID = ?")) {
+                stmt.setInt(1, loanID);
+                stmt.setInt(2, oldKey);
+
+                int rowsUpdated = stmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("Loan with ID " + oldKey + " was updated successfully.");
+                } else {
+                    throw new RuntimeException("No loan with ID " + oldKey + " was found.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         public static Loan empty() {
             return new Loan(-1, "<edit>", "<edit>", Date.valueOf(LocalDate.now()), Date.valueOf(LocalDate.now()), false);
         }
     }
-    public record Hold(String isbn, int holdID, String userID, Date holdDate) implements Updatable {
+    public record Hold(int holdID, String isbn, String userID, Date holdDate) implements Updatable<Integer> {
         public void updateDB() {
             try (var stmt = connection().prepareStatement("UPDATE holds SET isbn = ?, userID = ?, holdDate = ? WHERE holdID = ?")) {
                 stmt.setString(1, isbn);
@@ -129,8 +192,28 @@ public class DatabaseAccess {
             }
         }
 
+        public Integer primaryKey() {
+            return holdID;
+        }
+
+        public void updatePrimaryKey(Integer oldKey) {
+            try (var stmt = connection().prepareStatement("UPDATE holds SET holdID = ? WHERE holdID = ?")) {
+                stmt.setInt(1, holdID);
+                stmt.setInt(2, oldKey);
+
+                int rowsUpdated = stmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("Hold with ID " + oldKey + " was updated successfully.");
+                } else {
+                    throw new RuntimeException("No hold with ID " + oldKey + " was found.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         public static Hold empty() {
-            return new Hold("<edit>", -1, "<edit>", Date.valueOf(LocalDate.now()));
+            return new Hold(-1, "<edit>", "<edit>", Date.valueOf(LocalDate.now()));
         }
     }
 
@@ -233,7 +316,7 @@ public class DatabaseAccess {
         try (var stmt = connection().prepareStatement("SELECT * FROM holds")) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                holds.add(new Hold(rs.getString("isbn"), rs.getInt("holdID"), rs.getString("userID"), rs.getDate("holdDate")));
+                holds.add(new Hold(rs.getInt("holdID"), rs.getString("isbn"), rs.getString("userID"), rs.getDate("holdDate")));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -247,7 +330,7 @@ public class DatabaseAccess {
             stmt.setString(1, userID);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                holds.add(new Hold(rs.getString("isbn"), rs.getInt("holdID"), rs.getString("userID"), rs.getDate("holdDate")));
+                holds.add(new Hold(rs.getInt("holdID"), rs.getString("isbn"), rs.getString("userID"), rs.getDate("holdDate")));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -377,12 +460,12 @@ public class DatabaseAccess {
                         st.setDate(3, hold.holdDate);
 
                         ResultSet rs = st.executeQuery();
-                        return rs.next() ? Optional.of(new Hold(hold.isbn, rs.getInt("holdID"), hold.userID, hold.holdDate))
+                        return rs.next() ? Optional.of(new Hold(rs.getInt("holdID"), hold.isbn, hold.userID, hold.holdDate))
                                 : Optional.empty();
                     }
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Failed to add hold is.", e);
             }
         }
         return Optional.empty();
@@ -412,7 +495,7 @@ public class DatabaseAccess {
                     }
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Failed to add loan.", e);
             }
         }
         return Optional.empty();

@@ -112,7 +112,7 @@ public class PatronController {
             System.out.println(2);
             if (item instanceof Book book) {
                 System.out.println(3);
-                var realHold = DatabaseAccess.addHold(new Hold(book.isbn(), -1, userID, Date.valueOf(LocalDate.now())));
+                var realHold = DatabaseAccess.addHold(new Hold(-1, book.isbn(), userID, Date.valueOf(LocalDate.now())));
                 realHold.ifPresent(hold -> {
                     System.out.println(4);
                     holdsTable.getItems().add(hold);

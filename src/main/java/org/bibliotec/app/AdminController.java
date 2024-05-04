@@ -111,7 +111,7 @@ public class AdminController {
             final boolean typeIsBoolean = component.getType().equals(boolean.class);
 
             var column = new TableColumn<R, Object>(columnNames.get(component.getName()));
-            BiConsumer<R, Object> onEdit = (recordInstance, newValue) -> {
+            BiConsumer<R, Object> onEdit = (oldRecord, newValue) -> {
                 var args = Stream.of(record.getRecordComponents()).map(RecordComponent::getAccessor).map(accessor -> {
                     try {
                         if (accessor.equals(component.getAccessor())) {
@@ -124,15 +124,19 @@ public class AdminController {
                             }
                             return type.getDeclaredMethod("valueOf", String.class).invoke(null, newValue);
                         }
-                        return accessor.invoke(recordInstance);
+                        return accessor.invoke(oldRecord);
                     } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                         throw new RuntimeException(e);
                     }
                 }).toArray();
                 try {
                     R newRecord = (R) record.getConstructors()[0].newInstance(args);
-                    newRecord.updateDB();
-                    Platform.runLater(() -> table.getItems().set(table.getItems().indexOf(recordInstance), newRecord));
+                    if (newValue.equals(newRecord.primaryKey())) {
+                        newRecord.updatePrimaryKey(oldRecord.primaryKey());
+                    } else {
+                        newRecord.updateDB();
+                    }
+                    Platform.runLater(() -> table.getItems().set(table.getItems().indexOf(oldRecord), newRecord));
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
@@ -164,8 +168,10 @@ public class AdminController {
         var selectedTable = ((Node) actionEvent.getTarget()).getUserData();
         if (selectedTable == booksTable) {
             booksTable.getItems().add(Book.empty());
+            DatabaseAccess.addBook(booksTable.getItems().getLast());
         } else if (selectedTable == patronsTable) {
             patronsTable.getItems().add(User.empty());
+            DatabaseAccess.addPatron(patronsTable.getItems().getLast());
         } else if (selectedTable == loansTable) {
             loansTable.getItems().add(DatabaseAccess.addLoan(Loan.empty()).orElseThrow(() -> new RuntimeException("Failed to create loan.")));
         } else if (selectedTable == holdsTable) {

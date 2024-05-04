@@ -37,8 +37,8 @@ CREATE TABLE IF NOT EXISTS loans(
     expectedReturnDate DATE        NOT NULL,
     returned           BOOLEAN,
     PRIMARY KEY (loanID),
-    FOREIGN KEY (userID) REFERENCES users (userID),
-    FOREIGN KEY (isbn) REFERENCES books (isbn)
+    FOREIGN KEY (userID) REFERENCES users (userID) ON UPDATE CASCADE,
+    FOREIGN KEY (isbn) REFERENCES books (isbn) ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS holds(
@@ -47,8 +47,8 @@ CREATE TABLE IF NOT EXISTS holds(
     userID VARCHAR(45) NOT NULL,
     holdDate DATE      NOT NULL,
     PRIMARY KEY (holdID),
-    FOREIGN KEY (userID) REFERENCES users (userID),
-    FOREIGN KEY (isbn) REFERENCES books (isbn)
+    FOREIGN KEY (userID) REFERENCES users (userID) ON UPDATE CASCADE,
+    FOREIGN KEY (isbn) REFERENCES books (isbn) ON UPDATE CASCADE
 );
 
 -- Inserting data into the tables

@@ -3,7 +3,6 @@ package org.bibliotec.app;
 
 import org.bibliotec.app.DatabaseAccess.Book;
 import org.bibliotec.app.DatabaseAccess.Loan;
-import org.bibliotec.app.DatabaseAccess.User;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
