@@ -64,11 +64,11 @@ public class PatronController {
 
         columnsFromRecord(loansTable, Loan.class,
                 Map.of("loanID", "Loan ID", "isbn", "ISBN", "checkoutDate", "Checkout Date", "expectedReturnDate", "Return Date", "returned", "Returned"));
-        loansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoans()));
+        loansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForPatron(userID)));
 
         columnsFromRecord(holdsTable, Hold.class,
                 Map.of("holdID", "Hold ID", "isbn", "ISBN", "holdDate", "Hold Date"));
-        holdsTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getHolds()));
+        holdsTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getHoldsForPatron(userID)));
 
         columnsFromRecord(booksTable, Book.class,
                 Map.of("bookName", "Title", "author", "Author", "isbn", "ISBN", "publisher", "Publisher", "genre", "Genre", "totalCopies", "Total Copies"));

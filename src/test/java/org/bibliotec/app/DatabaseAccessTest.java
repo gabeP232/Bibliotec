@@ -27,11 +27,6 @@ class DatabaseAccessTest {
     }
 
     @Test
-    void getUsers() {
-        DatabaseAccess.getUsers();
-    }
-
-    @Test
     void addbooks() {
         Book bk = new Book("test", "author", "isbn", "publisher", "Romance", 2);
         DatabaseAccess.addBook(bk);

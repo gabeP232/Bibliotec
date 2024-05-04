@@ -164,11 +164,11 @@ public class DatabaseAccess {
     }
     
     public static Optional<User> getPatron(String userID) {
-        try (var stmt = connection().prepareStatement("SELECT * FROM users WHERE userID = ?")) {
+        try (var stmt = connection().prepareStatement("SELECT * FROM users WHERE isAdmin = FALSE AND userID = ?")) {
             stmt.setString(1, userID);
             ResultSet rs = stmt.executeQuery();
             return rs.next() ?
-                    Optional.of(new User(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getBoolean(6)))
+                    Optional.of(new User(rs.getString("userID"), rs.getString("fullName"), rs.getString("email"), rs.getString("address"), rs.getString("password"), false))
                     : Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -180,7 +180,7 @@ public class DatabaseAccess {
         try (var stmt = connection().prepareStatement("SELECT * FROM users WHERE isAdmin = FALSE")) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                patrons.add(new User(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getBoolean(6)));
+                patrons.add(new User(rs.getString("userID"), rs.getString("fullName"), rs.getString("email"), rs.getString("address"), rs.getString("password"), false));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -203,8 +203,7 @@ public class DatabaseAccess {
             }
             if (BCrypt.checkpw(patron.password, hashed)) {
                 System.out.println("Passwords match hash");
-            }
-            else {
+            } else {
                 System.out.println("Passwords do not match");
             }
         } catch (SQLIntegrityConstraintViolationException e ) {
@@ -229,26 +228,26 @@ public class DatabaseAccess {
         }
     }
 
-    public static List<User> getUsers() {
-        var users = new ArrayList<User>();
-        try (var stmt = connection().prepareStatement("SELECT * FROM users")) {
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                users.add(new User(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getBoolean(6)));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return users;
-
-    }
-
     public static List<Hold> getHolds() {
         var holds = new ArrayList<Hold>();
         try (var stmt = connection().prepareStatement("SELECT * FROM holds")) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                holds.add(new Hold(rs.getString(1), rs.getInt(2), rs.getString(3), rs.getDate(4)));
+                holds.add(new Hold(rs.getString("isbn"), rs.getInt("holdID"), rs.getString("userID"), rs.getDate("holdDate")));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return holds;
+    }
+
+    public static List<Hold> getHoldsForPatron(String userID) {
+        var holds = new ArrayList<Hold>();
+        try (var stmt = connection().prepareStatement("SELECT * FROM holds WHERE userID = ?")) {
+            stmt.setString(1, userID);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                holds.add(new Hold(rs.getString("isbn"), rs.getInt("holdID"), rs.getString("userID"), rs.getDate("holdDate")));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -261,7 +260,7 @@ public class DatabaseAccess {
         try (var stmt = connection().prepareStatement("SELECT * FROM loans")) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                loans.add(new Loan(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getDate(4), rs.getDate(5), rs.getBoolean(6)));
+                loans.add(new Loan(rs.getInt("loanID"), rs.getString("isbn"), rs.getString("userID"), rs.getDate("checkoutDate"), rs.getDate("expectedReturnDate"), rs.getBoolean("returned")));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -275,7 +274,7 @@ public class DatabaseAccess {
             stmt.setString(1, userID);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                loans.add(new Loan(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getDate(4), rs.getDate(5), rs.getBoolean(6)));
+                loans.add(new Loan(rs.getInt("loanID"), rs.getString("isbn"), rs.getString("userID"), rs.getDate("checkoutDate"), rs.getDate("expectedReturnDate"), rs.getBoolean("returned")));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -289,7 +288,7 @@ public class DatabaseAccess {
             stmt.setString(1, isbn);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                loans.add(new Loan(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getDate(4), rs.getDate(5), rs.getBoolean(6)));
+                loans.add(new Loan(rs.getInt("loanID"), rs.getString("isbn"), rs.getString("userID"), rs.getDate("checkoutDate"), rs.getDate("expectedReturnDate"), rs.getBoolean("returned")));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -302,7 +301,7 @@ public class DatabaseAccess {
             stmt.setString(1, loan.userID);
             ResultSet rs = stmt.executeQuery();
             return rs.next() ?
-                    Optional.of(new User(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getBoolean(6)))
+                    Optional.of(new User(rs.getString("userID"), rs.getString("fullName"), rs.getString("email"), rs.getString("address"), rs.getString("password"), rs.getBoolean("isAdmin")))
                     : Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -378,7 +377,7 @@ public class DatabaseAccess {
                         st.setDate(3, hold.holdDate);
 
                         ResultSet rs = st.executeQuery();
-                        return rs.next() ? Optional.of(new Hold(hold.isbn, rs.getInt(1), hold.userID, hold.holdDate))
+                        return rs.next() ? Optional.of(new Hold(hold.isbn, rs.getInt("holdID"), hold.userID, hold.holdDate))
                                 : Optional.empty();
                     }
                 }
@@ -408,7 +407,7 @@ public class DatabaseAccess {
 
                         ResultSet rs = st.executeQuery();
                         return rs.next() ?
-                                Optional.of(new Loan(rs.getInt(0), loan.isbn, loan.userID, loan.checkoutDate, loan.expectedReturnDate, loan.returned))
+                                Optional.of(new Loan(rs.getInt("loanID"), loan.isbn, loan.userID, loan.checkoutDate, loan.expectedReturnDate, loan.returned))
                                 : Optional.empty();
                     }
                 }
@@ -419,8 +418,6 @@ public class DatabaseAccess {
         return Optional.empty();
     }
 
-
-    //find by loan id and set returned to true
     public static void removeLoan(Loan loan) {
         try (var stmt = connection().prepareStatement("DELETE FROM loans WHERE isbn = ?")) {
             stmt.setString(1, loan.isbn);
@@ -428,7 +425,6 @@ public class DatabaseAccess {
             int rowsDeleted = stmt.executeUpdate();
             if (rowsDeleted > 0) {
                 System.out.println("Book with ISBN " + loan.isbn + " was successfully returned.");
-
             } else {
                 System.out.println("No book with ISBN " + loan.isbn + " was found in loans.");
             }

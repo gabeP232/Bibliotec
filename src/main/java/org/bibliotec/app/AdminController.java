@@ -1,6 +1,7 @@
 package org.bibliotec.app;
 
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -98,6 +99,9 @@ public class AdminController {
         columnsFromRecord(booksTable, Book.class,
                 Map.of("bookName", "Title", "author", "Author", "isbn", "ISBN", "publisher", "Publisher", "genre", "Genre", "totalCopies", "Total Copies"));
         booksTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getBooks()));
+        var availableCopies = new TableColumn<Book, String>("Available Copies");
+        availableCopies.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(String.valueOf(DatabaseAccess.getAvailableCopies(cellData.getValue().isbn()))));
+        booksTable.getColumns().add(availableCopies);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -108,7 +112,6 @@ public class AdminController {
 
             var column = new TableColumn<R, Object>(columnNames.get(component.getName()));
             BiConsumer<R, Object> onEdit = (recordInstance, newValue) -> {
-                System.out.println("Hello world!");
                 var args = Stream.of(record.getRecordComponents()).map(RecordComponent::getAccessor).map(accessor -> {
                     try {
                         if (accessor.equals(component.getAccessor())) {
