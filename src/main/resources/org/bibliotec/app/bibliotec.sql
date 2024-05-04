@@ -69,6 +69,7 @@ INSERT IGNORE INTO books (bookName, author, isbn, publisher, genre) VALUES ('Eng
 INSERT IGNORE INTO books (bookName, author, isbn, publisher, genre) VALUES ('Steve Jobs', 'Walter Isaacson', '978-1451648539', 'Simon & Schuster', 'Biography');
 INSERT IGNORE INTO books (bookName, author, isbn, publisher, genre) VALUES ('The 7 Habits of Highly Effective People', 'Stephen R. Covey', '978-1982137274', 'Simon & Schuster', 'Self-Help');
 
+INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('dummy user', 'only to satisfy', 'foreign key constraint', '<edit>', 'when admin is adding loans and holds');
 INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('John Doe', 'john@doe.com', '123 Main St', 'johndoe', '$2a$10$kx4oZ6H9Ly4LyBBqYS33bOaANys1oCmnHDaaz8ymoDCPHTUSGzgKO');
 INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Jane Doe', 'jane@doe.com', '123 First St', 'janedoe', '$2a$10$kx4oZ6H9Ly4LyBBqYS33bOaANys1oCmnHDaaz8ymoDCPHTUSGzgKO');
 INSERT IGNORE INTO users (fullName, email, address, userID, password) VALUES ('Bob Smith', 'bob@smith.com', '123 Second St', 'bobsmith', '$2a$10$kx4oZ6H9Ly4LyBBqYS33bOaANys1oCmnHDaaz8ymoDCPHTUSGzgKO');

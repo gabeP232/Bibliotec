@@ -123,10 +123,6 @@ public class DatabaseAccess {
                 throw new RuntimeException(e);
             }
         }
-
-        public static User empty() {
-            return new User("<edit>", "<edit>", "<edit>", "<edit>", "<edit>", false);
-        }
     }
     public record Loan(int loanID, String isbn, String userID, Date checkoutDate, Date expectedReturnDate, boolean returned) implements Updatable<Integer> {
         public void updateDB() {
@@ -145,6 +141,9 @@ public class DatabaseAccess {
                     throw new RuntimeException("No loan with ID " + loanID + " was found.");
                 }
             } catch (SQLException e) {
+                if (e.getMessage().contains("foreign key constraint fails")) {
+                    throw new RuntimeException("Either the user ID or ISBN was not found.", e);
+                }
                 throw new RuntimeException(e);
             }
         }
@@ -169,8 +168,8 @@ public class DatabaseAccess {
             }
         }
 
-        public static Loan empty() {
-            return new Loan(-1, "<edit>", "<edit>", Date.valueOf(LocalDate.now()), Date.valueOf(LocalDate.now()), false);
+        public static Loan empty(String isbn) {
+            return new Loan(-1, isbn, "<edit>", Date.valueOf(LocalDate.now()), Date.valueOf(LocalDate.now()), false);
         }
     }
     public record Hold(int holdID, String isbn, String userID, Date holdDate) implements Updatable<Integer> {
@@ -188,6 +187,9 @@ public class DatabaseAccess {
                     throw new RuntimeException("No hold with ID " + holdID + " was found.");
                 }
             } catch (SQLException e) {
+                if (e.getMessage().contains("foreign key constraint fails")) {
+                    throw new RuntimeException("Either the user ID or ISBN was not found.", e);
+                }
                 throw new RuntimeException(e);
             }
         }
@@ -212,13 +214,13 @@ public class DatabaseAccess {
             }
         }
 
-        public static Hold empty() {
-            return new Hold(-1, "<edit>", "<edit>", Date.valueOf(LocalDate.now()));
+        public static Hold empty(String isbn) {
+            return new Hold(-1, isbn, "<edit>", Date.valueOf(LocalDate.now()));
         }
     }
 
     public static Optional<User> login(String username, String password) {
-        try (var stmt = connection().prepareStatement("SELECT * FROM users where userID = ?")) {
+        try (var stmt = connection().prepareStatement("SELECT * FROM users where userID = ? AND userID != '<edit>'")) {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             if (rs.next() && BCrypt.checkpw(password, rs.getString("password"))) {
@@ -227,6 +229,18 @@ public class DatabaseAccess {
             else {
                 return Optional.empty();
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Optional<Book> getBook(String isbn) {
+        try (var stmt = connection().prepareStatement("SELECT * FROM books WHERE isbn = ?")) {
+            stmt.setString(1, isbn);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() ?
+                    Optional.of(new Book(rs.getString("bookName"), rs.getString("author"), rs.getString("isbn"), rs.getString("publisher"), rs.getString("genre"), rs.getInt("totalCopies")))
+                    : Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -247,7 +261,7 @@ public class DatabaseAccess {
     }
     
     public static Optional<User> getPatron(String userID) {
-        try (var stmt = connection().prepareStatement("SELECT * FROM users WHERE isAdmin = FALSE AND userID = ?")) {
+        try (var stmt = connection().prepareStatement("SELECT * FROM users WHERE isAdmin = FALSE AND userID = ? AND userID != '<edit>'")) {
             stmt.setString(1, userID);
             ResultSet rs = stmt.executeQuery();
             return rs.next() ?
@@ -260,7 +274,7 @@ public class DatabaseAccess {
 
     public static List<User> getPatrons() {
         var patrons = new ArrayList<User>();
-        try (var stmt = connection().prepareStatement("SELECT * FROM users WHERE isAdmin = FALSE")) {
+        try (var stmt = connection().prepareStatement("SELECT * FROM users WHERE isAdmin = FALSE AND userID != '<edit>'")) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 patrons.add(new User(rs.getString("userID"), rs.getString("fullName"), rs.getString("email"), rs.getString("address"), rs.getString("password"), false));
@@ -297,7 +311,7 @@ public class DatabaseAccess {
     }
 
     public static void removePatron(String id) {
-        try (var stmt = connection().prepareStatement("DELETE FROM users WHERE userID = ?")) {
+        try (var stmt = connection().prepareStatement("DELETE FROM users WHERE userID = ? AND userID != '<edit>'")) {
             stmt.setString(1, id);
 
             int rowsDeleted = stmt.executeUpdate();
@@ -380,7 +394,7 @@ public class DatabaseAccess {
     }
 
     public static Optional<User> getPatronForLoan(Loan loan) {
-        try (var stmt = connection().prepareStatement("SELECT * FROM users WHERE userID = ?")) {
+        try (var stmt = connection().prepareStatement("SELECT * FROM users WHERE userID = ? AND userID != '<edit>'")) {
             stmt.setString(1, loan.userID);
             ResultSet rs = stmt.executeQuery();
             return rs.next() ?
@@ -445,6 +459,7 @@ public class DatabaseAccess {
     }
 
     public static Optional<Hold> addHold(Hold hold) {
+        var bookName = getBook(hold.isbn).orElseThrow(() -> new RuntimeException("Book not found.")).bookName;
         if (!isBookAvailable(hold.isbn)) {
             try (var stmt = connection().prepareStatement("INSERT INTO holds (isbn, userID, holdDate) VALUES (?, ?, ?)")) {
                 stmt.setString(1, hold.isbn);
@@ -464,14 +479,17 @@ public class DatabaseAccess {
                                 : Optional.empty();
                     }
                 }
+                return Optional.empty();
             } catch (SQLException e) {
-                throw new RuntimeException("Failed to add hold is.", e);
+                throw new RuntimeException("Failed to add hold.", e);
             }
+        } else {
+            throw new RuntimeException("Book '" + bookName + "' is currently available. Please check it out instead.");
         }
-        return Optional.empty();
     }
 
     public static Optional<Loan> addLoan(Loan loan) {
+        var bookName = getBook(loan.isbn).orElseThrow(() -> new RuntimeException("Book not found.")).bookName;
         if (isBookAvailable(loan.isbn)) {
             try (var stmt = connection().prepareStatement("INSERT INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (?, ?, ?, ?,?)")) {
                 stmt.setString(1, loan.isbn);
@@ -497,8 +515,10 @@ public class DatabaseAccess {
             } catch (SQLException e) {
                 throw new RuntimeException("Failed to add loan.", e);
             }
+            return Optional.empty();
+        } else {
+            throw new RuntimeException("Book '" + bookName + "' is currently checked out. Please place a hold instead.");
         }
-        return Optional.empty();
     }
 
     public static void removeLoan(Loan loan) {

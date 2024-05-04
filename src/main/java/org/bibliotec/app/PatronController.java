@@ -26,8 +26,9 @@ public class PatronController {
     private static Scene scene;
     private static String userID;
 
-    @SuppressWarnings("rawtypes") @FXML
-    private TableView booksTable, loansTable, holdsTable;
+    @FXML private TableView<Book> booksTable;
+    @FXML private TableView<Loan> loansTable;
+    @FXML private TableView<Hold> holdsTable;
     @FXML private TextField nameField, emailField, addressField;
     @FXML private Button holdButton;
     @FXML private ToggleGroup tabs;
@@ -45,7 +46,6 @@ public class PatronController {
         Main.stage.setScene(scene);
     }
 
-    @SuppressWarnings("unchecked")
     public void initialize() {
         tabs.selectedToggleProperty().addListener((__, oldVal, selected) -> {
             if (selected == null) {
@@ -105,28 +105,17 @@ public class PatronController {
         }
     }
 
-    @SuppressWarnings({"unchecked"})
     public void hold() {
-        System.out.println(1);
-        booksTable.getSelectionModel().getSelectedItems().forEach(item -> {
-            System.out.println(2);
-            if (item instanceof Book book) {
-                System.out.println(3);
-                var realHold = DatabaseAccess.addHold(new Hold(-1, book.isbn(), userID, Date.valueOf(LocalDate.now())));
-                realHold.ifPresent(hold -> {
-                    System.out.println(4);
-                    holdsTable.getItems().add(hold);
-                });
-            }
-        });
+        booksTable.getSelectionModel().getSelectedItems().forEach(book ->
+                DatabaseAccess.addHold(new Hold(-1, book.isbn(), userID, Date.valueOf(LocalDate.now())))
+                .ifPresent(hold -> holdsTable.getItems().add(hold)));
     }
 
     public void cancelHold() {
-        var item = holdsTable.getSelectionModel().getSelectedItem();
-        holdsTable.getItems().remove(item);
-        if (item instanceof Hold hold) {
+        holdsTable.getSelectionModel().getSelectedItems().forEach(hold -> {
+            holdsTable.getItems().remove(hold);
             DatabaseAccess.removeHold(hold.holdID());
-        }
+        });
     }
 
     public void logout() {

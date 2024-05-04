@@ -13,6 +13,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -169,13 +170,19 @@ public class AdminController {
         if (selectedTable == booksTable) {
             booksTable.getItems().add(Book.empty());
             DatabaseAccess.addBook(booksTable.getItems().getLast());
-        } else if (selectedTable == patronsTable) {
-            patronsTable.getItems().add(User.empty());
-            DatabaseAccess.addPatron(patronsTable.getItems().getLast());
         } else if (selectedTable == loansTable) {
-            loansTable.getItems().add(DatabaseAccess.addLoan(Loan.empty()).orElseThrow(() -> new RuntimeException("Failed to create loan.")));
+            var dialog = new TextInputDialog("ISBN");
+            dialog.setHeaderText("Enter the ISBN of the book to loan.");
+            dialog.showAndWait().ifPresent(isbn -> {
+                loansTable.getItems().add(DatabaseAccess.addLoan(Loan.empty(isbn)).orElseThrow(() -> new RuntimeException("Failed to create loan.")));
+            });
         } else if (selectedTable == holdsTable) {
-            holdsTable.getItems().add(DatabaseAccess.addHold(Hold.empty()).orElseThrow(() -> new RuntimeException("Failed to create hold.")));
+            var dialog = new TextInputDialog("ISBN");
+            dialog.setHeaderText("Enter the ISBN of the book to hold.");
+            dialog.showAndWait().ifPresent(isbn -> {
+                DatabaseAccess.getBook(isbn).orElseThrow(() -> new RuntimeException("Book not found."));
+                holdsTable.getItems().add(DatabaseAccess.addHold(Hold.empty(isbn)).orElseThrow(() -> new RuntimeException("Failed to create hold.")));
+            });
         }
     }
 
