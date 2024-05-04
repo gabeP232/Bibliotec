@@ -132,7 +132,7 @@ public class AdminController {
                 }).toArray();
                 try {
                     R newRecord = (R) record.getConstructors()[0].newInstance(args);
-                    if (newValue.equals(newRecord.primaryKey())) {
+                    if (newValue == newRecord.primaryKey()) {
                         newRecord.updatePrimaryKey(oldRecord.primaryKey());
                     } else {
                         newRecord.updateDB();

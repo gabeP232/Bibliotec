@@ -43,7 +43,7 @@ public class LoginController {
     public void initialize() {
         registering.addListener(__ -> {
             errorMessage.setVisible(false);
-            List.of(username, fullName, password, confirmPassword, email, address).forEach(node -> setRedHighlight(node, false));
+            List.of(username, fullName, password, confirmPassword, email, address).forEach(node -> Utils.setRedHighlight(node, false));
         });
         register.textProperty().bind(when(registering).then("Confirm Registration").otherwise("Register"));
         login.textProperty().bind(when(registering).then("Cancel").otherwise("Login"));
@@ -93,15 +93,15 @@ public class LoginController {
         if (registering.get()) {
             boolean failed = false;
             if (username.getText().length() < 4) {
-                setRedHighlight(username, true);
+                Utils.setRedHighlight(username, true);
                 failed = true;
             }
             if (password.getText().length() < 8) {
-                setRedHighlight(password, true);
+                Utils.setRedHighlight(password, true);
                 failed = true;
             }
             if (!confirmPassword.getText().equals(password.getText())) {
-                setRedHighlight(confirmPassword, true);
+                Utils.setRedHighlight(confirmPassword, true);
                 failed = true;
             }
             errorMessage.setVisible(failed);
@@ -116,8 +116,6 @@ public class LoginController {
         }
     }
 
-    private static void setRedHighlight(Node node, boolean highlight) {
-        node.pseudoClassStateChanged(Styles.STATE_DANGER, highlight);
-    }
+
 
 }

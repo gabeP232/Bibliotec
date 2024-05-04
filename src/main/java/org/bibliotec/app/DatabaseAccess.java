@@ -86,12 +86,11 @@ public class DatabaseAccess {
     }
     public record User(String userID, String fullName, String email, String address, String password, boolean isAdmin) implements Updatable<String> {
         public void updateDB() {
-            try (var stmt = connection().prepareStatement("UPDATE users SET fullName = ?, email = ?, address = ?, password = ? WHERE userID = ?")) {
+            try (var stmt = connection().prepareStatement("UPDATE users SET fullName = ?, email = ?, address = ? WHERE userID = ?")) {
                 stmt.setString(1, fullName);
                 stmt.setString(2, email);
                 stmt.setString(3, address);
-                stmt.setString(4, password);
-                stmt.setString(5, userID);
+                stmt.setString(4, userID);
 
                 int rowsUpdated = stmt.executeUpdate();
                 if (rowsUpdated > 0) {
@@ -223,15 +222,45 @@ public class DatabaseAccess {
         try (var stmt = connection().prepareStatement("SELECT * FROM users where userID = ? AND userID != '<edit>'")) {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
-            if (rs.next() && BCrypt.checkpw(password, rs.getString("password"))) {
+            if (rs.next() && verifyPassword(password, rs.getString("password"))) {
                 return Optional.of(new User(rs.getString("userID"), rs.getString("fullName"), rs.getString("email"), rs.getString("address"), rs.getString("password"), rs.getBoolean("isAdmin")));
-            }
-            else {
+            } else {
                 return Optional.empty();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void updatePassword(String userID, String currentPassword, String newPassword) {
+        try (var stmt = connection().prepareStatement("SELECT password FROM users WHERE userID = ? AND userID != '<edit>'")) {
+            stmt.setString(1, userID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next() && verifyPassword(currentPassword, rs.getString("password"))) {
+                try (var updateStmt = connection().prepareStatement("UPDATE users SET password = ? WHERE userID = ?")) {
+                    updateStmt.setString(1, hashPassword(newPassword));
+                    updateStmt.setString(2, userID);
+                    int rowsUpdated = updateStmt.executeUpdate();
+                    if (rowsUpdated > 0) {
+                        System.out.println("Password for user with ID " + userID + " was updated successfully.");
+                    } else {
+                        throw new RuntimeException("Unable to update password for user '" + userID + "'.");
+                    }
+                }
+            } else {
+                throw new RuntimeException("Invalid password.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+
+    public static boolean verifyPassword(String password, String hash) {
+        return BCrypt.checkpw(password, hash);
     }
 
     public static Optional<Book> getBook(String isbn) {
@@ -287,21 +316,15 @@ public class DatabaseAccess {
 
     public static void addPatron(User patron) {
         try (var stmt = connection().prepareStatement("INSERT INTO users (userID, fullName, email, address, password) VALUES (?, ?, ?, ?, ?)")) {
-            String hashed = BCrypt.hashpw(patron.password, BCrypt.gensalt());
             stmt.setString(1, patron.userID);
             stmt.setString(2, patron.fullName);
             stmt.setString(3, patron.email);
-            stmt.setString(4, patron.address);
-            stmt.setString(5, hashed);
+            stmt.setString(4, patron.address);;
+            stmt.setString(5, hashPassword(patron.password));
 
             int rowsInserted = stmt.executeUpdate();
             if (rowsInserted > 0) {
                 System.out.println("A new Patron was added successfully.");
-            }
-            if (BCrypt.checkpw(patron.password, hashed)) {
-                System.out.println("Passwords match hash");
-            } else {
-                System.out.println("Passwords do not match");
             }
         } catch (SQLIntegrityConstraintViolationException e ) {
             throw new RuntimeException("Duplicate User ID", e);

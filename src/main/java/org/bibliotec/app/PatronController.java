@@ -1,5 +1,7 @@
 package org.bibliotec.app;
 
+import atlantafx.base.controls.Message;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
@@ -14,6 +16,7 @@ import javafx.scene.layout.VBox;
 import org.bibliotec.app.DatabaseAccess.Book;
 import org.bibliotec.app.DatabaseAccess.Hold;
 import org.bibliotec.app.DatabaseAccess.Loan;
+import org.bibliotec.app.DatabaseAccess.User;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -22,6 +25,8 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Map;
 
+import static javafx.beans.binding.Bindings.when;
+
 public class PatronController {
     private static Scene scene;
     private static String userID;
@@ -29,7 +34,8 @@ public class PatronController {
     @FXML private TableView<Book> booksTable;
     @FXML private TableView<Loan> loansTable;
     @FXML private TableView<Hold> holdsTable;
-    @FXML private TextField nameField, emailField, addressField;
+    @FXML private TextField nameField, emailField, addressField, passwordField, confirmPassword;
+    @FXML private Message errorMessage;
     @FXML private Button holdButton;
     @FXML private ToggleGroup tabs;
 
@@ -53,6 +59,7 @@ public class PatronController {
             } else {
                 var childs = ((VBox) scene.getRoot()).getChildren();
                 childs.set(childs.size() - 1, (Node) selected.getUserData());
+                errorMessage.setVisible(false);
             }
         });
 
@@ -61,6 +68,17 @@ public class PatronController {
             emailField.setText(patron.email());
             addressField.setText(patron.address());
         });
+
+        errorMessage.managedProperty().bind(errorMessage.visibleProperty());
+        var passwordInvalid = passwordField.textProperty().length().lessThan(8);
+        var confirmPasswordInvalid = confirmPassword.textProperty().isNotEqualTo(passwordField.textProperty());
+        errorMessage.descriptionProperty().bind(
+                Bindings.concat(
+                        when(passwordInvalid).then("Password must be at least 8 characters.").otherwise(""),
+                        when(passwordInvalid.and(confirmPasswordInvalid)).then("\n").otherwise(""),
+                        when(confirmPasswordInvalid).then("Passwords must match.").otherwise("")
+                )
+        );
 
         columnsFromRecord(loansTable, Loan.class,
                 Map.of("loanID", "Loan ID", "isbn", "ISBN", "checkoutDate", "Checkout Date", "expectedReturnDate", "Return Date", "returned", "Returned"));
@@ -77,14 +95,14 @@ public class PatronController {
         availableCopies.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(String.valueOf(DatabaseAccess.getAvailableCopies(cellData.getValue().isbn()))));
         booksTable.getColumns().add(availableCopies);
 
-//        holdButton.disableProperty().bind(booksTable.getSelectionModel().selectedItemProperty().(item -> !(item instanceof Book book && DatabaseAccess.getAvailableCopies(book.isbn()) > 0));
+        holdButton.disableProperty().bind(booksTable.getSelectionModel().selectedItemProperty().map(book -> DatabaseAccess.getAvailableCopies(book.isbn()) > 0));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static <R extends Record> void columnsFromRecord(TableView<R> table, Class<R> record, Map<String, String> columnNames) {
         for (var component : record.getRecordComponents()) {
             if (!columnNames.containsKey(component.getName())) continue;
-            final boolean typeIsBoolean = component.getType().equals(boolean.class) || component.getType().equals(Boolean.class);
+            final boolean typeIsBoolean = component.getType().equals(boolean.class);
 
             var column = new TableColumn<R, Object>(columnNames.get(component.getName()));
             column.setCellValueFactory(cellData -> {
@@ -118,8 +136,41 @@ public class PatronController {
         });
     }
 
+    public void saveProfile() {
+        var oldUser = DatabaseAccess.getPatron(userID).orElseThrow();
+        var name = nameField.getText().isBlank() ? oldUser.fullName() : nameField.getText();
+        var email = emailField.getText().isBlank() ? oldUser.email() : emailField.getText();
+        var address = addressField.getText().isBlank() ? oldUser.address() : addressField.getText();
+
+        if (!passwordField.getText().isEmpty() || !confirmPassword.getText().isEmpty()) {
+            if (passwordField.getText().length() < 8) {
+                Utils.setRedHighlight(passwordField, true);
+                errorMessage.setVisible(true);
+                return;
+            }
+            if (!confirmPassword.getText().equals(passwordField.getText())) {
+                Utils.setRedHighlight(confirmPassword, true);
+                errorMessage.setVisible(true);
+                return;
+            }
+            var dialog = new TextInputDialog();
+            dialog.setTitle("Confirm Current Password");
+            dialog.setHeaderText("Please enter your current password to save changes.");
+            dialog.showAndWait().ifPresent(password -> {
+                DatabaseAccess.updatePassword(userID, password, passwordField.getText());
+                new User(userID, name, email, address, null, false).updateDB();
+            });
+            errorMessage.setVisible(false);
+        } else {
+            new User(userID, name, email, address, null, false).updateDB();
+            errorMessage.setVisible(false);
+        }
+
+    }
+
     public void logout() {
         userID = null;
+        errorMessage.setVisible(false);
         LoginController.show();
     }
 }
