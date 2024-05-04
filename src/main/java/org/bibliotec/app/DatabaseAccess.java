@@ -11,12 +11,6 @@ import java.util.Optional;
 
 public class DatabaseAccess {
 
-    public record Genre(String name, String category) {}
-    public record Book(String bookName, String author, String isbn, String publisher, String genre, int totalCopies) {}
-    public record User(String userID, String fullName, String email, String address, String password, boolean isAdmin) {}
-    public record Loan(int loanID, String isbn, String userID, LocalDate checkoutDate, LocalDate expectedReturnDate, boolean returned) {}
-    public record Hold(String isbn, int holdID, String userID, LocalDate holdDate) {}
-
     private static Connection connection;
 
     public static Connection connection() {
@@ -37,11 +31,114 @@ public class DatabaseAccess {
         return connection;
     }
 
+    interface Updatable {
+        void updateDB();
+    }
+
+    public record Genre(String name, String category) {}
+    public record Book(String bookName, String author, String isbn, String publisher, String genre, int totalCopies) implements Updatable {
+        public void updateDB() {
+            try (var stmt = connection().prepareStatement("UPDATE books SET bookName = ?, author = ?, publisher = ?, genre = ?, totalCopies = ? WHERE isbn = ?")) {
+                stmt.setString(1, bookName);
+                stmt.setString(2, author);
+                stmt.setString(3, publisher);
+                stmt.setString(4, genre);
+                stmt.setInt(5, totalCopies);
+                stmt.setString(6, isbn);
+
+                int rowsUpdated = stmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("Book with ISBN " + isbn + " was updated successfully.");
+                } else {
+                    throw new RuntimeException("No book with ISBN " + isbn + " was found.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public static Book empty() {
+            return new Book("<edit>", "<edit>", Utils.makeISBN(), "<edit>", "Reference", 0);
+        }
+    }
+    public record User(String userID, String fullName, String email, String address, String password, boolean isAdmin) implements Updatable {
+        public void updateDB() {
+            try (var stmt = connection().prepareStatement("UPDATE users SET fullName = ?, email = ?, address = ?, password = ? WHERE userID = ?")) {
+                stmt.setString(1, fullName);
+                stmt.setString(2, email);
+                stmt.setString(3, address);
+                stmt.setString(4, password);
+                stmt.setString(5, userID);
+
+                int rowsUpdated = stmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("User with ID " + userID + " was updated successfully.");
+                } else {
+                    throw new RuntimeException("No user with ID " + userID + " was found.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public static User empty() {
+            return new User("<edit>", "<edit>", "<edit>", "<edit>", "<edit>", false);
+        }
+    }
+    public record Loan(int loanID, String isbn, String userID, Date checkoutDate, Date expectedReturnDate, boolean returned) implements Updatable {
+        public void updateDB() {
+            try (var stmt = connection().prepareStatement("UPDATE loans SET isbn = ?, userID = ?, checkoutDate = ?, expectedReturnDate = ?, returned = ? WHERE loanID = ?")) {
+                stmt.setString(1, isbn);
+                stmt.setString(2, userID);
+                stmt.setDate(3, checkoutDate);
+                stmt.setDate(4, expectedReturnDate);
+                stmt.setBoolean(5, returned);
+                stmt.setInt(6, loanID);
+
+                int rowsUpdated = stmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("Loan with ID " + loanID + " was updated successfully.");
+                } else {
+                    throw new RuntimeException("No loan with ID " + loanID + " was found.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public static Loan empty() {
+            return new Loan(-1, "<edit>", "<edit>", Date.valueOf(LocalDate.now()), Date.valueOf(LocalDate.now()), false);
+        }
+    }
+    public record Hold(String isbn, int holdID, String userID, Date holdDate) implements Updatable {
+        public void updateDB() {
+            try (var stmt = connection().prepareStatement("UPDATE holds SET isbn = ?, userID = ?, holdDate = ? WHERE holdID = ?")) {
+                stmt.setString(1, isbn);
+                stmt.setString(2, userID);
+                stmt.setDate(3, holdDate);
+                stmt.setInt(4, holdID);
+
+                int rowsUpdated = stmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("Hold with ID " + holdID + " was updated successfully.");
+                } else {
+                    throw new RuntimeException("No hold with ID " + holdID + " was found.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public static Hold empty() {
+            return new Hold("<edit>", -1, "<edit>", Date.valueOf(LocalDate.now()));
+        }
+    }
+
     public static Optional<User> login(String username, String password) {
         try (var stmt = connection().prepareStatement("SELECT * FROM users where userID = ?")) {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
-            if (rs.next() && org.mindrot.jbcrypt.BCrypt.checkpw(password, rs.getString("password"))) {
+            if (rs.next() && BCrypt.checkpw(password, rs.getString("password"))) {
                 return Optional.of(new User(rs.getString("userID"), rs.getString("fullName"), rs.getString("email"), rs.getString("address"), rs.getString("password"), rs.getBoolean("isAdmin")));
             }
             else {
@@ -58,7 +155,7 @@ public class DatabaseAccess {
         try (var stmt = connection().prepareStatement("SELECT * FROM books")) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                books.add(new Book(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getInt(6)));
+                books.add(new Book(rs.getString("bookName"), rs.getString("author"), rs.getString("isbn"), rs.getString("publisher"), rs.getString("genre"), rs.getInt("totalCopies")));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -93,7 +190,7 @@ public class DatabaseAccess {
 
     public static void addPatron(User patron) {
         try (var stmt = connection().prepareStatement("INSERT INTO users (userID, fullName, email, address, password) VALUES (?, ?, ?, ?, ?)")) {
-            String hashed = org.mindrot.jbcrypt.BCrypt.hashpw(patron.password, org.mindrot.jbcrypt.BCrypt.gensalt(10));
+            String hashed = BCrypt.hashpw(patron.password, BCrypt.gensalt());
             stmt.setString(1, patron.userID);
             stmt.setString(2, patron.fullName);
             stmt.setString(3, patron.email);
@@ -104,7 +201,7 @@ public class DatabaseAccess {
             if (rowsInserted > 0) {
                 System.out.println("A new Patron was added successfully.");
             }
-            if (org.mindrot.jbcrypt.BCrypt.checkpw(patron.password, hashed)) {
+            if (BCrypt.checkpw(patron.password, hashed)) {
                 System.out.println("Passwords match hash");
             }
             else {
@@ -151,7 +248,7 @@ public class DatabaseAccess {
         try (var stmt = connection().prepareStatement("SELECT * FROM holds")) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                holds.add(new Hold(rs.getString(1), rs.getInt(2), rs.getString(3), rs.getDate(4).toLocalDate()));
+                holds.add(new Hold(rs.getString(1), rs.getInt(2), rs.getString(3), rs.getDate(4)));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -164,7 +261,7 @@ public class DatabaseAccess {
         try (var stmt = connection().prepareStatement("SELECT * FROM loans")) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                loans.add(new Loan(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getDate(4).toLocalDate(), rs.getDate(5).toLocalDate(), rs.getBoolean(6)));
+                loans.add(new Loan(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getDate(4), rs.getDate(5), rs.getBoolean(6)));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -178,7 +275,7 @@ public class DatabaseAccess {
             stmt.setString(1, userID);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                loans.add(new Loan(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getDate(4).toLocalDate(), rs.getDate(5).toLocalDate(), rs.getBoolean(6)));
+                loans.add(new Loan(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getDate(4), rs.getDate(5), rs.getBoolean(6)));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -192,7 +289,7 @@ public class DatabaseAccess {
             stmt.setString(1, isbn);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                loans.add(new Loan(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getDate(4).toLocalDate(), rs.getDate(5).toLocalDate(), rs.getBoolean(6)));
+                loans.add(new Loan(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getDate(4), rs.getDate(5), rs.getBoolean(6)));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -253,7 +350,7 @@ public class DatabaseAccess {
             try (var totalCopiesStmt = connection().prepareStatement("SELECT totalCopies FROM books WHERE isbn = ?")) {
                 totalCopiesStmt.setString(1, isbn);
                 rs = totalCopiesStmt.executeQuery();
-                int totalCopies = rs.next() ? rs.getInt(1) : 0;
+                int totalCopies = rs.next() ? rs.getInt("totalCopies") : 0;
                 return Math.max(totalCopies - checkedOutCopies, 0);
             }
         } catch (SQLException e) {
@@ -270,7 +367,7 @@ public class DatabaseAccess {
             try (var stmt = connection().prepareStatement("INSERT INTO holds (isbn, userID, holdDate) VALUES (?, ?, ?)")) {
                 stmt.setString(1, hold.isbn);
                 stmt.setString(2, hold.userID);
-                stmt.setDate(3, Date.valueOf(hold.holdDate));
+                stmt.setDate(3, hold.holdDate);
 
                 int rowsInserted = stmt.executeUpdate();
                 if (rowsInserted > 0) {
@@ -278,7 +375,7 @@ public class DatabaseAccess {
                     try (var st = connection().prepareStatement("SELECT holdID FROM holds WHERE isbn = ? AND userID = ? AND holdDate = ?")) {
                         st.setString(1, hold.isbn);
                         st.setString(2, hold.userID);
-                        st.setDate(3, Date.valueOf(hold.holdDate));
+                        st.setDate(3, hold.holdDate);
 
                         ResultSet rs = st.executeQuery();
                         return rs.next() ? Optional.of(new Hold(hold.isbn, rs.getInt(1), hold.userID, hold.holdDate))
@@ -297,8 +394,8 @@ public class DatabaseAccess {
             try (var stmt = connection().prepareStatement("INSERT INTO loans (isbn, userID, checkoutDate, expectedReturnDate, returned) VALUES (?, ?, ?, ?,?)")) {
                 stmt.setString(1, loan.isbn);
                 stmt.setString(2, loan.userID);
-                stmt.setDate(3, Date.valueOf(loan.checkoutDate));
-                stmt.setDate(4, Date.valueOf(loan.expectedReturnDate));
+                stmt.setDate(3, loan.checkoutDate);
+                stmt.setDate(4, loan.expectedReturnDate);
                 stmt.setBoolean(5, loan.returned);
 
                 int rowsInserted = stmt.executeUpdate();
@@ -306,7 +403,7 @@ public class DatabaseAccess {
                     try (var st = connection().prepareStatement("SELECT loanID FROM Loans WHERE isbn = ? AND userID = ? AND checkoutDate = ? AND returned = ?")) {
                         st.setString(1, loan.isbn);
                         st.setString(2, loan.userID);
-                        st.setDate(3, Date.valueOf(loan.checkoutDate));
+                        st.setDate(3, loan.checkoutDate);
                         st.setBoolean(4, loan.returned);
 
                         ResultSet rs = st.executeQuery();

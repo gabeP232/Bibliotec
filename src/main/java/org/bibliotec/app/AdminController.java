@@ -1,7 +1,8 @@
 package org.bibliotec.app;
 
-import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -23,15 +24,21 @@ import org.bibliotec.app.DatabaseAccess.User;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.RecordComponent;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 public class AdminController {
 
     private static Scene scene;
 
-    @SuppressWarnings("rawtypes") @FXML
-    private TableView booksTable, patronsTable, patronLoansTable, loansTable, bookLoansTable, holdsTable;
+    @FXML private TableView<Book> booksTable;
+    @FXML private TableView<User> patronsTable;
+    @FXML private TableView<Loan> patronLoansTable, loansTable, bookLoansTable;
+    @FXML private TableView<Hold> holdsTable;
     @FXML private ToggleGroup tabs;
 
     public static void show() {
@@ -46,7 +53,6 @@ public class AdminController {
         Main.stage.setScene(scene);
     }
 
-    @SuppressWarnings("unchecked")
     public void initialize() {
         tabs.selectedToggleProperty().addListener((__, oldVal, selected) -> {
             if (selected == null) {
@@ -71,22 +77,20 @@ public class AdminController {
 
         columnsFromRecord(patronLoansTable, Loan.class,
                 Map.of("loanID", "Loan ID", "isbn", "ISBN", "checkoutDate", "Checkout Date", "expectedReturnDate", "Expected Return Date", "returned", "Returned"));
-        patronsTable.getSelectionModel().selectedItemProperty().addListener((__, ___, selected) -> {
-            if (selected == null) {
+        patronsTable.getSelectionModel().selectedItemProperty().addListener((__, ___, patron) -> {
+            if (patron == null) {
                 patronLoansTable.setItems(FXCollections.emptyObservableList());
-            } else if (selected instanceof User patron) {
-                System.out.println("Selected: " + selected);
+            } else {
                 patronLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForPatron(patron.userID())));
-                System.out.println(patronLoansTable.getItems());
             }
         });
 
         columnsFromRecord(bookLoansTable, Loan.class,
                 Map.of("loanID", "Loan ID", "checkoutDate", "Checkout Date", "expectedReturnDate", "Expected Return Date", "returned", "Is Returned"));
-        booksTable.getSelectionModel().selectedItemProperty().addListener((__, ___, selected) -> {
-            if (selected == null) {
+        booksTable.getSelectionModel().selectedItemProperty().addListener((__, ___, book) -> {
+            if (book == null) {
                 bookLoansTable.setItems(FXCollections.emptyObservableList());
-            } else if (selected instanceof Book book) {
+            } else {
                 bookLoansTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getLoansForBook(book.isbn())));
             }
         });
@@ -96,38 +100,54 @@ public class AdminController {
         booksTable.setItems(FXCollections.observableArrayList(DatabaseAccess.getBooks()));
     }
 
-    private static final Object placeholder = new Object();
-
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <R extends Record> void columnsFromRecord(TableView<R> table, Class<R> record, Map<String, String> columnNames) {
+    private static <R extends Record & DatabaseAccess.Updatable> void columnsFromRecord(TableView<R> table, Class<R> record, Map<String, String> columnNames) {
         for (var component : record.getRecordComponents()) {
             if (!columnNames.containsKey(component.getName())) continue;
-            final boolean typeIsBoolean = component.getType().equals(boolean.class) || component.getType().equals(Boolean.class);
+            final boolean typeIsBoolean = component.getType().equals(boolean.class);
 
             var column = new TableColumn<R, Object>(columnNames.get(component.getName()));
+            BiConsumer<R, Object> onEdit = (recordInstance, newValue) -> {
+                System.out.println("Hello world!");
+                var args = Stream.of(record.getRecordComponents()).map(RecordComponent::getAccessor).map(accessor -> {
+                    try {
+                        if (accessor.equals(component.getAccessor())) {
+                            Class type = accessor.getReturnType();
+                            if (typeIsBoolean || type.isAssignableFrom(String.class)) {
+                                return newValue;
+                            } else if (type.isPrimitive()) {
+                                // boxes primitive types (e.g. int.class -> Integer.class)
+                                type = MethodType.methodType(type).wrap().returnType();
+                            }
+                            return type.getDeclaredMethod("valueOf", String.class).invoke(null, newValue);
+                        }
+                        return accessor.invoke(recordInstance);
+                    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).toArray();
+                try {
+                    R newRecord = (R) record.getConstructors()[0].newInstance(args);
+                    newRecord.updateDB();
+                    Platform.runLater(() -> table.getItems().set(table.getItems().indexOf(recordInstance), newRecord));
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            };
             column.setCellValueFactory(cellData -> {
                 try {
-                    if (cellData.getValue() == null || cellData.getValue() == placeholder) {
-                        if (typeIsBoolean) {
-                            return (ObservableValue) new ReadOnlyBooleanWrapper(false);
-                        } else {
-                            return (ObservableValue) new ReadOnlyStringWrapper("<edit>");
-                        }
-                    }
                     if (typeIsBoolean) {
-                        return (ObservableValue) new ReadOnlyBooleanWrapper((Boolean) component.getAccessor().invoke(cellData.getValue()));
+                        var property = new SimpleBooleanProperty((Boolean) component.getAccessor().invoke(cellData.getValue()));
+                        property.addListener((__, ___, newValue) -> onEdit.accept(cellData.getValue(), newValue));
+                        return (ObservableValue) property;
                     } else {
-                        return (ObservableValue) new ReadOnlyStringWrapper(String.valueOf(component.getAccessor().invoke(cellData.getValue())));
+                        return (ObservableValue) new SimpleStringProperty(String.valueOf(component.getAccessor().invoke(cellData.getValue())));
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
             });
-            column.setOnEditCommit(event -> {
-//                String newValue = event.getNewValue();
-//                R recordInstance = event.getRowValue();
-                // save the data
-            });
+            column.setOnEditCommit(event -> onEdit.accept(event.getRowValue(), event.getNewValue()));
             if (typeIsBoolean) {
                 column.setCellFactory(CheckBoxTableCell.forTableColumn((TableColumn) column));
             } else {
@@ -137,9 +157,17 @@ public class AdminController {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public void add(ActionEvent actionEvent) {
-        ((TableView) ((Node) actionEvent.getTarget()).getUserData()).getItems().add(placeholder);
+        var selectedTable = ((Node) actionEvent.getTarget()).getUserData();
+        if (selectedTable == booksTable) {
+            booksTable.getItems().add(Book.empty());
+        } else if (selectedTable == patronsTable) {
+            patronsTable.getItems().add(User.empty());
+        } else if (selectedTable == loansTable) {
+            loansTable.getItems().add(DatabaseAccess.addLoan(Loan.empty()).orElseThrow(() -> new RuntimeException("Failed to create loan.")));
+        } else if (selectedTable == holdsTable) {
+            holdsTable.getItems().add(DatabaseAccess.addHold(Hold.empty()).orElseThrow(() -> new RuntimeException("Failed to create hold.")));
+        }
     }
 
     @SuppressWarnings("rawtypes")
