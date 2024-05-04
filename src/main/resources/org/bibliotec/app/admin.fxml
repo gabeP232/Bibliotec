@@ -14,14 +14,17 @@
         <ToggleGroup fx:id="tabs"/>
         <MasterDetailPane fx:id="booksView" dividerPosition="0.7" VBox.vgrow="ALWAYS">
             <masterNode>
-                <AnchorPane>
-                    <TableView fx:id="booksTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                               AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-                    <ToolBar AnchorPane.bottomAnchor="0">
-                        <Button text="Add" onAction="#add" userData="$booksTable"/>
-                        <Button text="Delete" onAction="#delete" userData="$booksTable"/>
-                    </ToolBar>
-                </AnchorPane>
+                <BorderPane>
+                    <center>
+                        <TableView fx:id="booksTable" editable="true"/>
+                    </center>
+                    <bottom>
+                        <ToolBar>
+                            <Button text="Add" onAction="#add" userData="$booksTable"/>
+                            <Button text="Delete" onAction="#delete" userData="$booksTable"/>
+                        </ToolBar>
+                    </bottom>
+                </BorderPane>
             </masterNode>
             <detailNode>
                 <TableView fx:id="bookLoansTable" minWidth="500" editable="true"/>
@@ -29,34 +32,43 @@
         </MasterDetailPane>
         <MasterDetailPane fx:id="patronsView" detailSide="RIGHT" dividerPosition="0.6" VBox.vgrow="ALWAYS">
             <masterNode>
-                <AnchorPane>
-                    <TableView fx:id="patronsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                               AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-                    <ToolBar AnchorPane.bottomAnchor="0">
-                        <Button text="Delete" onAction="#delete" userData="$patronsTable"/>
-                    </ToolBar>
-                </AnchorPane>
+                <BorderPane>
+                    <center>
+                        <TableView fx:id="patronsTable" editable="true"/>
+                    </center>
+                    <bottom>
+                        <ToolBar>
+                            <Button text="Delete" onAction="#delete" userData="$patronsTable"/>
+                        </ToolBar>
+                    </bottom>
+                </BorderPane>
             </masterNode>
             <detailNode>
                 <TableView fx:id="patronLoansTable" minWidth="500" editable="true"/>
             </detailNode>
         </MasterDetailPane>
-        <AnchorPane fx:id="loansView" VBox.vgrow="ALWAYS">
-            <TableView fx:id="loansTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                       AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-            <ToolBar AnchorPane.bottomAnchor="0">
-                <Button text="Add" onAction="#add" userData="$loansTable"/>
-                <Button text="Delete" onAction="#delete" userData="$loansTable"/>
-            </ToolBar>
-        </AnchorPane>
-        <AnchorPane fx:id="holdsView" VBox.vgrow="ALWAYS">
-            <TableView fx:id="holdsTable" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                       AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-            <ToolBar AnchorPane.bottomAnchor="0">
-                <Button text="Add" onAction="#add" userData="$holdsTable"/>
-                <Button text="Delete" onAction="#delete" userData="$holdsTable"/>
-            </ToolBar>
-        </AnchorPane>
+        <BorderPane fx:id="loansView" VBox.vgrow="ALWAYS">
+            <center>
+                <TableView fx:id="loansTable" editable="true"/>
+            </center>
+            <bottom>
+                <ToolBar>
+                    <Button text="Add" onAction="#add" userData="$loansTable"/>
+                    <Button text="Delete" onAction="#delete" userData="$loansTable"/>
+                </ToolBar>
+            </bottom>
+        </BorderPane>
+        <BorderPane fx:id="holdsView" VBox.vgrow="ALWAYS">
+            <center>
+                <TableView fx:id="holdsTable" editable="true"/>
+            </center>
+            <bottom>
+                <ToolBar>
+                    <Button text="Add" onAction="#add" userData="$holdsTable"/>
+                    <Button text="Delete" onAction="#delete" userData="$holdsTable"/>
+                </ToolBar>
+            </bottom>
+        </BorderPane>
     </fx:define>
 
     <HBox alignment="CENTER" spacing="10">

@@ -13,24 +13,30 @@
 
     <fx:define>
         <ToggleGroup fx:id="tabs"/>
-        <AnchorPane fx:id="booksView">
-            <TableView fx:id="booksTable" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                       AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-            <ToolBar AnchorPane.bottomAnchor="0">
-                <Button fx:id="holdButton" text="Hold" onAction="#hold" userData="$booksTable"/>
-            </ToolBar>
-        </AnchorPane>
+        <BorderPane fx:id="booksView">
+            <center>
+                <TableView fx:id="booksTable"/>
+            </center>
+            <bottom>
+                <ToolBar>
+                    <Button fx:id="holdButton" text="Hold" onAction="#hold" userData="$booksTable"/>
+                </ToolBar>
+            </bottom>
+        </BorderPane>
         <AnchorPane fx:id="loansView" VBox.vgrow="ALWAYS">
             <TableView fx:id="loansTable" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
                        AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
         </AnchorPane>
-        <AnchorPane fx:id="holdsView" VBox.vgrow="ALWAYS">
-            <TableView fx:id="holdsTable" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                       AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-            <ToolBar AnchorPane.bottomAnchor="0">
-                <Button text="Cancel Hold" onAction="#cancelHold" userData="$holdsTable"/>
-            </ToolBar>
-        </AnchorPane>
+        <BorderPane fx:id="holdsView" VBox.vgrow="ALWAYS">
+            <center>
+                <TableView fx:id="holdsTable"/>
+            </center>
+            <bottom>
+                <ToolBar AnchorPane.bottomAnchor="0">
+                    <Button text="Cancel Hold" onAction="#cancelHold" userData="$holdsTable"/>
+                </ToolBar>
+            </bottom>
+        </BorderPane>
         <VBox fx:id="profileView" alignment="CENTER">
             <GridPane alignment="CENTER" vgap="40.0">
                 <columnConstraints>
